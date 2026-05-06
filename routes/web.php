@@ -6,46 +6,93 @@ use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProgramKerjaController;
 use App\Http\Controllers\HiradcController;
+use App\Http\Controllers\LiveAuditController;
 
-// Redirect root ke login
-Route::get('/', function () {
-    return redirect()->route('login');
-});
+/*
+|--------------------------------------------------------------------------
+| Redirect Root
+|--------------------------------------------------------------------------
+*/
 
-// Auth Routes (hanya untuk guest/belum login)
+Route::get('/', fn() => redirect()->route('login'));
+
+/*
+|--------------------------------------------------------------------------
+| Authentication Routes (Guest Only)
+|--------------------------------------------------------------------------
+*/
 Route::middleware('guest')->group(function () {
-    Route::get('/login', [LoginController::class, 'showLoginForm'])
-        ->name('login');
-    Route::post('/login', [LoginController::class, 'login'])
-        ->name('login.post');
+    Route::controller(LoginController::class)->group(function () {
+        Route::get('/login', 'showLoginForm')->name('login');
+        Route::post('/login', 'login')->name('login.post');
+    });
 });
 
-// Protected Routes (harus login)
-Route::middleware(['auth'])->group(function () {
+/*
+|--------------------------------------------------------------------------
+| Protected Routes (Authenticated Users)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth')->group(function () {
+
+    // Logout
     Route::post('/logout', [LogoutController::class, 'logout'])
         ->name('logout');
 
+    // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 
-    // HIRADC
-    Route::resource('hiradc', HiradcController::class)
-        ->except(['edit', 'update']);
-    Route::post('hiradc/{hiradc}/validate-v1', [HiradcController::class, 'validateV1'])
-        ->name('hiradc.validate-v1');
-    Route::post('hiradc/{hiradc}/validate-v2', [HiradcController::class, 'validateV2'])
-        ->name('hiradc.validate-v2');
+    /*
+    |--------------------------------------------------------------------------
+    | HIRADC
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('hiradc')->name('hiradc.')->group(function () {
+        Route::resource('/', HiradcController::class)
+            ->parameters(['' => 'hiradc'])
+            ->except(['edit', 'update']);
 
-    // Program Kerja
-    Route::resource('program-kerja', ProgramKerjaController::class);
-    Route::post(
-        'program-kerja/{programKerja}/upload-bukti',
-        [ProgramKerjaController::class, 'uploadBukti']
-    )
-        ->name('program-kerja.upload-bukti');
-    Route::post(
-        'program-kerja/{programKerja}/close',
-        [ProgramKerjaController::class, 'close']
-    )
-        ->name('program-kerja.close');
+        Route::post('{hiradc}/validate-v1', [HiradcController::class, 'validateV1'])
+            ->name('validate-v1');
+
+        Route::post('{hiradc}/validate-v2', [HiradcController::class, 'validateV2'])
+            ->name('validate-v2');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Program Kerja
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('program-kerja')->name('program-kerja.')->group(function () {
+        Route::resource('/', ProgramKerjaController::class)
+            ->parameters(['' => 'programKerja']);
+
+        Route::post('{programKerja}/upload-bukti', [ProgramKerjaController::class, 'uploadBukti'])
+            ->name('upload-bukti');
+
+        Route::post('{programKerja}/close', [ProgramKerjaController::class, 'close'])
+            ->name('close');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Live Audit
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('live-audit')->name('live-audit.')->group(function () {
+        Route::resource('/', LiveAuditController::class)
+            ->parameters(['' => 'liveAudit'])
+            ->except(['edit', 'update']);
+
+        Route::post('{liveAudit}/validate-v1', [LiveAuditController::class, 'validateV1'])
+            ->name('validate-v1');
+
+        Route::post('{liveAudit}/validate-v2', [LiveAuditController::class, 'validateV2'])
+            ->name('validate-v2');
+
+        Route::get('{liveAudit}/export-pdf', [LiveAuditController::class, 'exportPdf'])
+            ->name('export-pdf');
+    });
 });
