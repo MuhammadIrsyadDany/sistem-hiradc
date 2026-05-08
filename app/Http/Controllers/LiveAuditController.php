@@ -8,6 +8,8 @@ use App\Models\ChecklistItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use App\Models\Temuan;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class LiveAuditController extends Controller
@@ -53,20 +55,20 @@ class LiveAuditController extends Controller
         abort_if(Gate::denies('live_audit.create'), 403);
 
         $validated = $request->validate([
-            'diminta_oleh'         => 'nullable|string|max:255',
-            'nama_pekerjaan'       => 'required|string',
-            'no_work_order'        => 'nullable|string|max:100',
-            'lokasi'               => 'required|string|max:255',
-            'perusahaan'           => 'required|string|max:255',
-            'tanggal_mulai'        => 'required|date',
-            'tanggal_selesai'      => 'required|date|after_or_equal:tanggal_mulai',
-            'unsafe_action_text'   => 'nullable|string',
+            'diminta_oleh'          => 'nullable|string|max:255',
+            'nama_pekerjaan'        => 'required|string',
+            'no_work_order'         => 'nullable|string|max:100',
+            'lokasi'                => 'required|string|max:255',
+            'perusahaan'            => 'required|string|max:255',
+            'tanggal_mulai'         => 'required|date',
+            'tanggal_selesai'       => 'required|date|after_or_equal:tanggal_mulai',
+            'unsafe_action_text'    => 'nullable|string',
             'unsafe_condition_text' => 'nullable|string',
-            'working_permit'       => 'nullable|array',
-            'checklists'           => 'required|array',
-            'checklists.*'         => 'in:tidak,ya,na',
-            'is_stopped'           => 'nullable|boolean',
-            'stop_alasan'          => 'nullable|string',
+            'working_permit'        => 'nullable|array',
+            'checklists'            => 'required|array',
+            'checklists.*'          => 'in:tidak,ya,na',
+            'is_stopped'            => 'nullable|boolean',
+            'stop_alasan'           => 'nullable|string',
         ]);
 
         $liveAudit = LiveAudit::create([
@@ -96,8 +98,40 @@ class LiveAuditController extends Controller
             ]);
         }
 
+        // Auto-create draft temuan dari UA
+        if (
+            !empty($validated['unsafe_action_text'])
+            && strtolower($validated['unsafe_action_text']) !== 'tidak ada'
+        ) {
+            Temuan::create([
+                'live_audit_id' => $liveAudit->id,
+                'reported_by'   => Auth::id(),
+                'distrik'       => $validated['lokasi'],
+                'judul_temuan'  => $validated['unsafe_action_text'],
+                'lokasi'        => $validated['lokasi'],
+                'kategori'      => 'unsafe_action',
+                'status'        => 'draft',
+            ]);
+        }
+
+        // Auto-create draft temuan dari UC
+        if (
+            !empty($validated['unsafe_condition_text'])
+            && strtolower($validated['unsafe_condition_text']) !== 'tidak ada'
+        ) {
+            Temuan::create([
+                'live_audit_id' => $liveAudit->id,
+                'reported_by'   => Auth::id(),
+                'distrik'       => $validated['lokasi'],
+                'judul_temuan'  => $validated['unsafe_condition_text'],
+                'lokasi'        => $validated['lokasi'],
+                'kategori'      => 'unsafe_condition',
+                'status'        => 'draft',
+            ]);
+        }
+
         return redirect()->route('live-audit.show', $liveAudit)
-            ->with('success', 'Live Audit berhasil disimpan dan menunggu validasi.');
+            ->with('success', 'Live Audit berhasil disimpan. Draft temuan UA/UC otomatis dibuat.');
     }
 
     public function show(LiveAudit $liveAudit)
