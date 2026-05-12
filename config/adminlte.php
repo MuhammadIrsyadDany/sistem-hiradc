@@ -341,12 +341,10 @@ return [
         ],
         ['header' => 'PELAPORAN'],
         [
-            'text'  => 'Temuan UA/UC',
-            'url'   => 'temuan',
-            'icon'  => 'fas fa-exclamation-triangle',
-            'can'   => 'temuan.view',
-            'label' => '$temuanDraftCount',
-            'label_color' => 'danger',
+            'text' => 'Temuan UA/UC',
+            'url'  => 'temuan',
+            'icon' => 'fas fa-exclamation-triangle',
+            'can'  => 'temuan.view',
         ],
         ['header' => 'MASTER DATA'],
         [
@@ -421,6 +419,11 @@ return [
                     'type' => 'css',
                     'asset' => false,
                     'location' => '//cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css',
+                ],
+                [
+                    'type' => 'js',
+                    'asset' => false,
+                    'location' => '//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js',
                 ],
             ],
         ],

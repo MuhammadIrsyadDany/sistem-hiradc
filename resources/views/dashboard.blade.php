@@ -407,13 +407,11 @@
 
 @section('js')
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-
     <script>
         // ================================================================
         // Chart 1: UA vs UC vs Near Miss per Bulan
         // ================================================================
         const ctxUaUc = document.getElementById('chartUaUc').getContext('2d');
-
         new Chart(ctxUaUc, {
             type: 'bar',
             data: {
@@ -460,6 +458,81 @@
         });
 
         // ================================================================
+        // Chart 2: Status Temuan (Donut)
+        // ================================================================
+        const ctxStatus = document.getElementById('chartStatusTemuan').getContext('2d');
+        new Chart(ctxStatus, {
+            type: 'doughnut',
+            data: {
+                labels: ['Draft', 'Open', 'Validated V1', 'Validated V2', 'Closed'],
+                datasets: [{
+                    data: [
+                        {{ $chartStatusTemuan['draft'] }},
+                        {{ $chartStatusTemuan['open'] }},
+                        {{ $chartStatusTemuan['validated_v1'] }},
+                        {{ $chartStatusTemuan['validated_v2'] }},
+                        {{ $chartStatusTemuan['closed'] }},
+                    ],
+                    backgroundColor: [
+                        '#6c757d',
+                        '#ffc107',
+                        '#17a2b8',
+                        '#007bff',
+                        '#28a745',
+                    ],
+                }],
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                },
+                cutout: '65%',
+            },
+        });
+
+        // ================================================================
+        // Chart 3: Top 5 Lokasi Temuan (Horizontal Bar)
+        // ================================================================
+        const ctxLokasi = document.getElementById('chartLokasi').getContext('2d');
+        new Chart(ctxLokasi, {
+            type: 'bar',
+            data: {
+                labels: {!! json_encode($temuanPerLokasi->pluck('lokasi')) !!},
+                datasets: [{
+                    label: 'Jumlah Temuan',
+                    data: {!! json_encode($temuanPerLokasi->pluck('total')) !!},
+                    backgroundColor: [
+                        'rgba(220, 53, 69, 0.8)',
+                        'rgba(255, 193, 7, 0.8)',
+                        'rgba(23, 162, 184, 0.8)',
+                        'rgba(40, 167, 69, 0.8)',
+                        'rgba(111, 66, 193, 0.8)',
+                    ],
+                }],
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        },
+                    },
+                },
+            },
+        });
+
+        // ================================================================
         // Update badge sidebar setiap 60 detik
         // ================================================================
         setInterval(function() {
@@ -476,81 +549,4 @@
                 .catch(() => {});
         }, 60000);
     </script>
-@endsection
-
-// ================================================================
-// Chart 2: Status Temuan (Donut)
-// ================================================================
-const ctxStatus = document.getElementById('chartStatusTemuan').getContext('2d');
-new Chart(ctxStatus, {
-type: 'doughnut',
-data: {
-labels: ['Draft', 'Open', 'Validated V1', 'Validated V2', 'Closed'],
-datasets: [{
-data: [
-{{ $chartStatusTemuan['draft'] }},
-{{ $chartStatusTemuan['open'] }},
-{{ $chartStatusTemuan['validated_v1'] }},
-{{ $chartStatusTemuan['validated_v2'] }},
-{{ $chartStatusTemuan['closed'] }},
-],
-backgroundColor: [
-'#6c757d',
-'#ffc107',
-'#17a2b8',
-'#007bff',
-'#28a745',
-],
-}],
-},
-options: {
-responsive: true,
-plugins: {
-legend: {
-display: false
-},
-},
-cutout: '65%',
-},
-});
-
-// ================================================================
-// Chart 3: Top 5 Lokasi Temuan (Horizontal Bar)
-// ================================================================
-const ctxLokasi = document.getElementById('chartLokasi').getContext('2d');
-new Chart(ctxLokasi, {
-type: 'bar',
-data: {
-labels: {!! json_encode($temuanPerLokasi->pluck('lokasi')) !!},
-datasets: [{
-label: 'Jumlah Temuan',
-data: {!! json_encode($temuanPerLokasi->pluck('total')) !!},
-backgroundColor: [
-'rgba(220, 53, 69, 0.8)',
-'rgba(255, 193, 7, 0.8)',
-'rgba(23, 162, 184, 0.8)',
-'rgba(40, 167, 69, 0.8)',
-'rgba(111, 66, 193, 0.8)',
-],
-}],
-},
-options: {
-indexAxis: 'y',
-responsive: true,
-plugins: {
-legend: {
-display: false
-},
-},
-scales: {
-x: {
-beginAtZero: true,
-ticks: {
-stepSize: 1
-},
-},
-},
-},
-});
-</script>
 @endsection
