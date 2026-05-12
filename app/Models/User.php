@@ -12,7 +12,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
-        'email', 
+        'email',
         'password',
         'nip',
         'jabatan',
@@ -30,5 +30,29 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * URL profile untuk AdminLTE
+     */
+    public function adminlte_profile_url()
+    {
+        return route('profile.index');
+    }
+
+    /**
+     * Deskripsi user
+     */
+    public function adminlte_desc()
+    {
+        return $this->jabatan ?? 'User';
+    }
+
+    /**
+     * Foto profile user
+     */
+    public function adminlte_image()
+    {
+        return null;
     }
 }

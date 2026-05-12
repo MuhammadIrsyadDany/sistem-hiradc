@@ -133,12 +133,12 @@ return [
     |
     */
 
-    'usermenu_enabled' => true,
-    'usermenu_header' => false,
-    'usermenu_header_class' => 'bg-primary',
-    'usermenu_image' => false,
-    'usermenu_desc' => false,
-    'usermenu_profile_url' => false,
+    'usermenu_enabled'       => true,
+    'usermenu_image'         => false,
+    'usermenu_desc'          => '',
+    'usermenu_profile_url'   => 'profile',
+    'usermenu_logout_url'    => 'logout',
+    'usermenu_logout_method' => 'POST',
 
     /*
     |--------------------------------------------------------------------------
@@ -341,10 +341,12 @@ return [
         ],
         ['header' => 'PELAPORAN'],
         [
-            'text' => 'Temuan UA/UC',
-            'url'  => 'temuan',
-            'icon' => 'fas fa-exclamation-triangle',
-            'can'  => 'temuan.view',
+            'text'  => 'Temuan UA/UC',
+            'url'   => 'temuan',
+            'icon'  => 'fas fa-exclamation-triangle',
+            'can'   => 'temuan.view',
+            'label' => '$temuanDraftCount',
+            'label_color' => 'danger',
         ],
         ['header' => 'MASTER DATA'],
         [
@@ -358,6 +360,12 @@ return [
             'url'  => 'master/users',
             'icon' => 'fas fa-users',
             'can'  => 'users.manage',
+        ],
+        ['header' => 'AKUN'],
+        [
+            'text' => 'Profil Saya',
+            'url'  => 'profile',
+            'icon' => 'fas fa-user-circle',
         ],
     ],
 
@@ -416,6 +424,19 @@ return [
                 ],
             ],
         ],
+
+        // Tambahan plugin Datatables
+        'Datatables' => [
+            'active' => false,
+            'files' => [
+                [
+                    'type' => 'js',
+                    'asset' => false,
+                    'location' => '//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js',
+                ],
+            ],
+        ],
+
         'Select2' => [
             'active' => false,
             'files' => [
@@ -431,6 +452,7 @@ return [
                 ],
             ],
         ],
+
         'Chartjs' => [
             'active' => false,
             'files' => [
@@ -441,6 +463,7 @@ return [
                 ],
             ],
         ],
+
         'Sweetalert2' => [
             'active' => false,
             'files' => [
@@ -451,6 +474,7 @@ return [
                 ],
             ],
         ],
+
         'Pace' => [
             'active' => false,
             'files' => [
