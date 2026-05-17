@@ -159,12 +159,15 @@ Route::middleware(['auth'])->group(function () {
 
     // Master Data
     Route::prefix('master')->name('master.')->group(function () {
+        // Checklist Items
         Route::resource('checklist-items', ChecklistItemController::class);
         Route::post(
             'checklist-items/{id}/restore',
             [ChecklistItemController::class, 'restore']
         )
             ->name('checklist-items.restore');
+
+        // Users
         Route::resource('users', UserController::class)
             ->except(['show']);
     });
