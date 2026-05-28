@@ -161,7 +161,8 @@ return [
     'layout_fixed_footer' => null,
     'layout_dark_mode' => null,
 
-    'skin' => 'blue',
+    'skin'   => 'green',
+    'layout' => 'fixed',
 
     /*
     |--------------------------------------------------------------------------
@@ -424,6 +425,14 @@ return [
                     'type' => 'js',
                     'asset' => false,
                     'location' => '//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js',
+                ],
+            ],
+
+            'custom_css' => [
+                [
+                    'type'     => 'css',
+                    'asset'    => true,
+                    'location' => 'css/custom.css',
                 ],
             ],
         ],

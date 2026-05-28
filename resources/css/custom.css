@@ -1,0 +1,512 @@
+/* ================================================================
+   HIRADC PLTU — Corporate Green Theme
+   Terinspirasi dari identitas visual PLN Nusantara Power
+================================================================ */
+
+/* ── Root Variables ── */
+:root {
+    --pltu-green-dark:   #004d2e;
+    --pltu-green:        #006b3f;
+    --pltu-green-mid:    #008a50;
+    --pltu-green-light:  #00a65a;
+    --pltu-green-pale:   #e8f5ee;
+    --pltu-gold:         #f0a500;
+    --pltu-gold-light:   #ffc107;
+    --pltu-white:        #ffffff;
+    --pltu-gray-light:   #f4f6f9;
+    --pltu-gray:         #6c757d;
+    --pltu-text:         #2d3748;
+    --pltu-border:       #dee2e6;
+    --pltu-shadow:       0 2px 12px rgba(0,0,0,0.08);
+    --pltu-shadow-hover: 0 4px 20px rgba(0,107,63,0.15);
+    --pltu-radius:       8px;
+    --pltu-radius-lg:    12px;
+}
+
+/* ================================================================
+   SIDEBAR
+================================================================ */
+.main-sidebar {
+    background: linear-gradient(180deg, var(--pltu-green-dark) 0%, var(--pltu-green) 100%) !important;
+    box-shadow: 3px 0 15px rgba(0,0,0,0.2) !important;
+}
+
+.brand-link {
+    background: var(--pltu-green-dark) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+    padding: 16px 20px !important;
+}
+
+.brand-link .brand-text {
+    color: var(--pltu-white) !important;
+    font-weight: 700 !important;
+    font-size: 16px !important;
+    letter-spacing: 0.5px !important;
+}
+
+.brand-link img,
+.brand-link .brand-image {
+    filter: brightness(0) invert(1);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+}
+
+/* Sidebar Nav Items */
+.nav-sidebar .nav-item > .nav-link {
+    color: rgba(255,255,255,0.75) !important;
+    border-radius: 6px !important;
+    margin: 2px 8px !important;
+    padding: 10px 14px !important;
+    transition: all 0.2s ease !important;
+    font-size: 13.5px !important;
+}
+
+.nav-sidebar .nav-item > .nav-link:hover {
+    background: rgba(255,255,255,0.12) !important;
+    color: var(--pltu-white) !important;
+    transform: translateX(3px);
+}
+
+.nav-sidebar .nav-item > .nav-link.active {
+    background: var(--pltu-green-light) !important;
+    color: var(--pltu-white) !important;
+    box-shadow: 0 3px 10px rgba(0,166,90,0.4) !important;
+    font-weight: 600 !important;
+}
+
+.nav-sidebar .nav-item > .nav-link .nav-icon {
+    color: rgba(255,255,255,0.6) !important;
+    font-size: 14px !important;
+}
+
+.nav-sidebar .nav-item > .nav-link.active .nav-icon {
+    color: var(--pltu-white) !important;
+}
+
+/* Sidebar Header */
+.nav-header {
+    color: rgba(255,255,255,0.4) !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    letter-spacing: 1.5px !important;
+    padding: 14px 16px 4px !important;
+    text-transform: uppercase !important;
+}
+
+/* Sidebar User Panel */
+.user-panel {
+    border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+    padding: 14px 16px !important;
+}
+
+.user-panel .info a {
+    color: var(--pltu-white) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+}
+
+.user-panel .info p {
+    color: rgba(255,255,255,0.5) !important;
+    font-size: 11px !important;
+}
+
+/* ================================================================
+   NAVBAR / TOPBAR
+================================================================ */
+.main-header.navbar {
+    background: var(--pltu-white) !important;
+    border-bottom: 2px solid var(--pltu-green-pale) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06) !important;
+}
+
+.main-header .navbar-nav .nav-link {
+    color: var(--pltu-text) !important;
+}
+
+.main-header .navbar-nav .nav-link:hover {
+    color: var(--pltu-green) !important;
+}
+
+/* ================================================================
+   CONTENT AREA
+================================================================ */
+.content-wrapper {
+    background: var(--pltu-gray-light) !important;
+}
+
+.content-header h1 {
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    color: var(--pltu-text) !important;
+}
+
+.content-header .breadcrumb {
+    background: transparent !important;
+}
+
+.content-header .breadcrumb-item a {
+    color: var(--pltu-green) !important;
+}
+
+/* ================================================================
+   CARDS
+================================================================ */
+.card {
+    border: none !important;
+    border-radius: var(--pltu-radius-lg) !important;
+    box-shadow: var(--pltu-shadow) !important;
+    transition: box-shadow 0.2s ease !important;
+    overflow: hidden !important;
+}
+
+.card:hover {
+    box-shadow: var(--pltu-shadow-hover) !important;
+}
+
+.card-header {
+    background: var(--pltu-white) !important;
+    border-bottom: 2px solid var(--pltu-green-pale) !important;
+    padding: 14px 20px !important;
+    font-weight: 600 !important;
+}
+
+.card-header.bg-primary   { background: var(--pltu-green) !important; border-bottom: none !important; }
+.card-header.bg-success   { background: var(--pltu-green-light) !important; border-bottom: none !important; }
+.card-header.bg-warning   { background: var(--pltu-gold) !important; border-bottom: none !important; }
+.card-header.bg-info      { background: #17a2b8 !important; border-bottom: none !important; }
+.card-header.bg-danger    { background: #dc3545 !important; border-bottom: none !important; }
+
+.card-title {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: var(--pltu-text) !important;
+    margin-bottom: 0 !important;
+}
+
+.card-header.bg-primary .card-title,
+.card-header.bg-success .card-title,
+.card-header.bg-warning .card-title,
+.card-header.bg-info .card-title,
+.card-header.bg-danger .card-title {
+    color: var(--pltu-white) !important;
+}
+
+/* ================================================================
+   SMALL BOXES (Stats Cards)
+================================================================ */
+.small-box {
+    border-radius: var(--pltu-radius-lg) !important;
+    box-shadow: var(--pltu-shadow) !important;
+    overflow: hidden !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.small-box:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: var(--pltu-shadow-hover) !important;
+}
+
+.small-box.bg-info    { background: linear-gradient(135deg, #17a2b8, #138496) !important; }
+.small-box.bg-success { background: linear-gradient(135deg, var(--pltu-green-light), var(--pltu-green)) !important; }
+.small-box.bg-warning { background: linear-gradient(135deg, #ffc107, #e0a800) !important; }
+.small-box.bg-danger  { background: linear-gradient(135deg, #dc3545, #c82333) !important; }
+
+.small-box .inner h3 {
+    font-size: 36px !important;
+    font-weight: 700 !important;
+}
+
+.small-box .small-box-footer {
+    background: rgba(0,0,0,0.12) !important;
+    padding: 6px !important;
+    font-size: 12px !important;
+    transition: background 0.2s !important;
+}
+
+.small-box .small-box-footer:hover {
+    background: rgba(0,0,0,0.2) !important;
+}
+
+/* ================================================================
+   BUTTONS
+================================================================ */
+.btn {
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    padding: 7px 16px !important;
+    transition: all 0.2s ease !important;
+}
+
+.btn-primary {
+    background: var(--pltu-green) !important;
+    border-color: var(--pltu-green) !important;
+    color: var(--pltu-white) !important;
+}
+
+.btn-primary:hover {
+    background: var(--pltu-green-dark) !important;
+    border-color: var(--pltu-green-dark) !important;
+    box-shadow: 0 4px 12px rgba(0,107,63,0.35) !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-success {
+    background: var(--pltu-green-light) !important;
+    border-color: var(--pltu-green-light) !important;
+}
+
+.btn-success:hover {
+    background: var(--pltu-green) !important;
+    border-color: var(--pltu-green) !important;
+}
+
+.btn-outline-primary {
+    color: var(--pltu-green) !important;
+    border-color: var(--pltu-green) !important;
+}
+
+.btn-outline-primary:hover {
+    background: var(--pltu-green) !important;
+    color: var(--pltu-white) !important;
+}
+
+/* ================================================================
+   TABLES
+================================================================ */
+.table {
+    font-size: 13.5px !important;
+}
+
+.table thead th {
+    background: var(--pltu-green-pale) !important;
+    color: var(--pltu-green-dark) !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    border-bottom: 2px solid var(--pltu-green-light) !important;
+    padding: 12px 14px !important;
+}
+
+.table tbody tr {
+    transition: background 0.15s ease !important;
+}
+
+.table tbody tr:hover {
+    background: var(--pltu-green-pale) !important;
+}
+
+.table tbody td {
+    padding: 11px 14px !important;
+    vertical-align: middle !important;
+    border-color: #edf2f7 !important;
+}
+
+.table-bordered {
+    border: 1px solid #edf2f7 !important;
+}
+
+/* ================================================================
+   BADGES
+================================================================ */
+.badge {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    padding: 4px 10px !important;
+    border-radius: 20px !important;
+    letter-spacing: 0.3px !important;
+}
+
+.badge-success  { background: var(--pltu-green-light) !important; }
+.badge-primary  { background: var(--pltu-green) !important; }
+.badge-warning  { background: var(--pltu-gold) !important; color: #fff !important; }
+
+/* ================================================================
+   FORMS
+================================================================ */
+.form-control {
+    border-radius: 6px !important;
+    border: 1.5px solid var(--pltu-border) !important;
+    font-size: 13.5px !important;
+    padding: 8px 12px !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+    color: var(--pltu-text) !important;
+}
+
+.form-control:focus {
+    border-color: var(--pltu-green-light) !important;
+    box-shadow: 0 0 0 3px rgba(0,166,90,0.12) !important;
+    outline: none !important;
+}
+
+.form-group label {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: var(--pltu-text) !important;
+    margin-bottom: 5px !important;
+}
+
+.custom-file-label {
+    border-radius: 6px !important;
+    border: 1.5px solid var(--pltu-border) !important;
+    font-size: 13.5px !important;
+}
+
+.custom-file-label::after {
+    background: var(--pltu-green) !important;
+    color: white !important;
+    border-radius: 0 6px 6px 0 !important;
+}
+
+/* ================================================================
+   ALERTS
+================================================================ */
+.alert {
+    border-radius: var(--pltu-radius) !important;
+    border: none !important;
+    font-size: 13.5px !important;
+    padding: 12px 16px !important;
+}
+
+.alert-success {
+    background: #d4edda !important;
+    color: #155724 !important;
+    border-left: 4px solid var(--pltu-green-light) !important;
+}
+
+.alert-warning {
+    background: #fff3cd !important;
+    color: #856404 !important;
+    border-left: 4px solid var(--pltu-gold) !important;
+}
+
+.alert-danger {
+    background: #f8d7da !important;
+    color: #721c24 !important;
+    border-left: 4px solid #dc3545 !important;
+}
+
+.alert-info {
+    background: var(--pltu-green-pale) !important;
+    color: var(--pltu-green-dark) !important;
+    border-left: 4px solid var(--pltu-green-light) !important;
+}
+
+/* ================================================================
+   PAGINATION
+================================================================ */
+.pagination .page-link {
+    color: var(--pltu-green) !important;
+    border-radius: 6px !important;
+    margin: 0 2px !important;
+    border: 1px solid var(--pltu-border) !important;
+    font-size: 13px !important;
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--pltu-green) !important;
+    border-color: var(--pltu-green) !important;
+    color: white !important;
+}
+
+.pagination .page-link:hover {
+    background: var(--pltu-green-pale) !important;
+    color: var(--pltu-green-dark) !important;
+}
+
+/* ================================================================
+   PROGRESS BARS
+================================================================ */
+.progress {
+    border-radius: 20px !important;
+    background: #e9ecef !important;
+    height: 10px !important;
+}
+
+.progress-bar {
+    border-radius: 20px !important;
+}
+
+.progress-bar.bg-success {
+    background: var(--pltu-green-light) !important;
+}
+
+/* ================================================================
+   TIMELINE
+================================================================ */
+.timeline > li > .timeline-item {
+    border-radius: var(--pltu-radius) !important;
+    box-shadow: var(--pltu-shadow) !important;
+    border: none !important;
+}
+
+.timeline > li > .fa,
+.timeline > li > .fas,
+.timeline > li > .far {
+    width: 34px !important;
+    height: 34px !important;
+    line-height: 34px !important;
+    font-size: 14px !important;
+}
+
+.timeline > li > .bg-green  { background: var(--pltu-green-light) !important; }
+.timeline > li > .bg-blue   { background: #17a2b8 !important; }
+
+/* ================================================================
+   FOOTER
+================================================================ */
+.main-footer {
+    background: var(--pltu-white) !important;
+    border-top: 1px solid var(--pltu-green-pale) !important;
+    color: var(--pltu-gray) !important;
+    font-size: 12px !important;
+    padding: 10px 20px !important;
+}
+
+/* ================================================================
+   SCROLLBAR
+================================================================ */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--pltu-green-mid);
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--pltu-green-dark);
+}
+
+/* ================================================================
+   UTILITIES
+================================================================ */
+.text-pltu-green { color: var(--pltu-green) !important; }
+.bg-pltu-green   { background: var(--pltu-green) !important; }
+.bg-pltu-pale    { background: var(--pltu-green-pale) !important; }
+
+.section-divider {
+    border: none;
+    border-top: 2px solid var(--pltu-green-pale);
+    margin: 20px 0;
+}
+
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--pltu-green);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+}
