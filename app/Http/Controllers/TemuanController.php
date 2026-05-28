@@ -41,9 +41,14 @@ class TemuanController extends Controller
     {
         abort_if(Gate::denies('temuan.view'), 403);
 
-        $temuans = Temuan::with(['reporter', 'fotos'])
-            ->latest()
-            ->paginate(10);
+        $query = Temuan::with(['reporter', 'fotos'])->latest();
+
+        // Filter by status
+        if (request('status') && request('status') !== 'all') {
+            $query->where('status', request('status'));
+        }
+
+        $temuans = $query->paginate(10)->withQueryString();
 
         return view('temuan.index', compact('temuans'));
     }

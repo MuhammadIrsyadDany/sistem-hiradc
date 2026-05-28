@@ -1,62 +1,111 @@
 @extends('adminlte::page')
-
 @section('title', 'Live Audit')
 
 @section('content_header')
-    <div class="d-flex justify-content-between align-items-center">
-        <h1>Live Audit</h1>
+    <x-page-header title="Live Audit / WIP" subtitle="Work In Practise — pemeriksaan keselamatan pekerjaan pihak ketiga"
+        icon="fas fa-clipboard-check">
         @can('live_audit.create')
             <a href="{{ route('live-audit.create') }}" class="btn btn-primary">
                 <i class="fas fa-plus mr-1"></i> Buat Live Audit
             </a>
         @endcan
-    </div>
+    </x-page-header>
 @endsection
 
 @section('content')
     @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show">
-            {{ session('success') }}
-            <button type="button" class="close" data-dismiss="alert">
-                <span>&times;</span>
-            </button>
-        </div>
+        <x-alert type="success">{{ session('success') }}</x-alert>
     @endif
 
+    {{-- Summary Cards --}}
+    <div class="row mb-4">
+        @php
+            $laTotal = \App\Models\LiveAudit::count();
+            $laPending = \App\Models\LiveAudit::whereIn('status', ['pending_v1', 'pending_v2'])->count();
+            $laApproved = \App\Models\LiveAudit::where('status', 'approved')->count();
+            $laStopped = \App\Models\LiveAudit::where('is_stopped', true)->count();
+        @endphp
+        <div class="col-md-3 col-6 mb-2">
+            <x-stat-mini label="Total" :value="$laTotal" color="#006b3f" />
+        </div>
+        <div class="col-md-3 col-6 mb-2">
+            <x-stat-mini label="Pending" :value="$laPending" color="#f0a500" />
+        </div>
+        <div class="col-md-3 col-6 mb-2">
+            <x-stat-mini label="Approved" :value="$laApproved" color="#00a65a" />
+        </div>
+        <div class="col-md-3 col-6 mb-2">
+            <x-stat-mini label="STOP" :value="$laStopped" color="#dc3545" />
+        </div>
+    </div>
+
     <div class="card">
-        <div class="card-body">
-            <table class="table table-bordered table-hover">
-                <thead class="thead-light">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead>
                     <tr>
                         <th width="5%">No</th>
                         <th>Nama Pekerjaan</th>
                         <th>Perusahaan</th>
                         <th>No WO</th>
-                        <th>Tgl Mulai</th>
+                        <th>Dibuat Oleh</th>
+                        <th>Tanggal Mulai</th>
                         <th width="15%">Status</th>
-                        <th width="10%">Aksi</th>
+                        <th width="8%" class="text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($liveAudits as $index => $audit)
                         <tr>
-                            <td>{{ $liveAudits->firstItem() + $index }}</td>
+                            <td style="color:#a0aec0; font-size:12px;">
+                                {{ $liveAudits->firstItem() + $index }}
+                            </td>
                             <td>
-                                {{ Str::limit($audit->nama_pekerjaan, 50) }}
+                                <div style="font-size:13px; font-weight:600; color:#2d3748;">
+                                    {{ Str::limit($audit->nama_pekerjaan, 45) }}
+                                </div>
                                 @if ($audit->is_stopped)
-                                    <span class="badge badge-danger ml-1">STOP</span>
+                                    <span
+                                        style="background:#f8d7da; color:#dc3545;
+                                                 font-size:10px; padding:2px 8px;
+                                                 border-radius:10px; font-weight:700;">
+                                        <i class="fas fa-stop-circle mr-1"></i>STOP
+                                    </span>
                                 @endif
                             </td>
-                            <td>{{ $audit->perusahaan }}</td>
-                            <td>{{ $audit->no_work_order ?? '-' }}</td>
-                            <td>{{ $audit->tanggal_mulai->format('d/m/Y') }}</td>
-                            <td>{!! $audit->status_badge !!}</td>
+                            <td style="font-size:13px;">
+                                {{ Str::limit($audit->perusahaan, 25) }}
+                            </td>
+                            <td style="font-size:12px; color:#718096;">
+                                {{ $audit->no_work_order ?? '-' }}
+                            </td>
                             <td>
-                                <a href="{{ route('live-audit.show', $audit) }}" class="btn btn-sm btn-info">
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <div
+                                        style="width:28px; height:28px; border-radius:50%;
+                                                background:#006b3f; color:#fff; font-size:11px;
+                                                display:flex; align-items:center;
+                                                justify-content:center; font-weight:700;
+                                                flex-shrink:0;">
+                                        {{ strtoupper(substr($audit->creator->name, 0, 1)) }}
+                                    </div>
+                                    <span style="font-size:13px;">
+                                        {{ $audit->creator->name }}
+                                    </span>
+                                </div>
+                            </td>
+                            <td style="font-size:12px; color:#718096;">
+                                {{ $audit->tanggal_mulai->format('d M Y') }}
+                            </td>
+                            <td>{!! $audit->status_badge !!}</td>
+                            <td class="text-center">
+                                <a href="{{ route('live-audit.show', $audit) }}" class="btn btn-sm btn-primary"
+                                    title="Detail">
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 @if ($audit->status === 'approved')
-                                    <a href="{{ route('live-audit.export-pdf', $audit) }}" class="btn btn-sm btn-danger">
+                                    <a href="{{ route('live-audit.export-pdf', $audit) }}" class="btn btn-sm btn-danger"
+                                        title="Export PDF">
                                         <i class="fas fa-file-pdf"></i>
                                     </a>
                                 @endif
@@ -64,16 +113,19 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted">
-                                Belum ada data live audit
+                            <td colspan="8">
+                                <x-empty-state icon="fas fa-clipboard-check" message="Belum ada data live audit"
+                                    sub="Buat live audit pertama menggunakan tombol di atas" />
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
-            <div class="mt-3">
+        </div>
+        @if ($liveAudits->hasPages())
+            <div class="card-footer">
                 {{ $liveAudits->links() }}
             </div>
-        </div>
+        @endif
     </div>
 @endsection
