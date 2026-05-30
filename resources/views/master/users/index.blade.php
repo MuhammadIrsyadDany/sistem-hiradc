@@ -1,81 +1,137 @@
 @extends('adminlte::page')
-
 @section('title', 'Manajemen User')
 
 @section('content_header')
-    <div class="d-flex justify-content-between align-items-center">
-        <h1>Manajemen User</h1>
+    <x-page-header title="Manajemen User" subtitle="Kelola akun dan hak akses pengguna sistem" icon="fas fa-users">
         <a href="{{ route('master.users.create') }}" class="btn btn-primary">
-            <i class="fas fa-plus mr-1"></i> Tambah User
+            <i class="fas fa-user-plus mr-1"></i> Tambah User
         </a>
-    </div>
+    </x-page-header>
 @endsection
 
 @section('content')
     @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show">
-            {{ session('success') }}
-            <button type="button" class="close" data-dismiss="alert">
-                <span>&times;</span>
-            </button>
-        </div>
+        <x-alert type="success">{{ session('success') }}</x-alert>
+    @endif
+    @if (session('error'))
+        <x-alert type="danger">{{ session('error') }}</x-alert>
     @endif
 
-    @if (session('error'))
-        <div class="alert alert-danger alert-dismissible fade show">
-            {{ session('error') }}
-            <button type="button" class="close" data-dismiss="alert">
-                <span>&times;</span>
-            </button>
+    {{-- Summary Cards --}}
+    <div class="row mb-4">
+        @php
+            $totalUsers = \App\Models\User::count();
+            $activeUsers = \App\Models\User::where('is_active', true)->count();
+            $roles = \Spatie\Permission\Models\Role::withCount('users')->get();
+        @endphp
+        <div class="col-md-3 col-6 mb-2">
+            <x-stat-mini label="Total User" :value="$totalUsers" color="#006b3f" />
         </div>
-    @endif
+        <div class="col-md-3 col-6 mb-2">
+            <x-stat-mini label="User Aktif" :value="$activeUsers" color="#00a65a" />
+        </div>
+        <div class="col-md-3 col-6 mb-2">
+            <x-stat-mini label="Nonaktif" :value="$totalUsers - $activeUsers" color="#6c757d" />
+        </div>
+        <div class="col-md-3 col-6 mb-2">
+            <x-stat-mini label="Total Role" :value="$roles->count()" color="#17a2b8" />
+        </div>
+    </div>
 
     <div class="card">
-        <div class="card-body">
-            <table class="table table-bordered table-hover">
-                <thead class="thead-light">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead>
                     <tr>
                         <th width="5%">No</th>
-                        <th>Nama</th>
-                        <th>Email</th>
-                        <th>NIP</th>
-                        <th>Jabatan</th>
+                        <th>Pengguna</th>
+                        <th>NIP / Jabatan</th>
                         <th>Role</th>
-                        <th width="8%" class="text-center">Status</th>
+                        <th>No HP</th>
+                        <th width="10%" class="text-center">Status</th>
                         <th width="10%" class="text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($users as $index => $user)
-                        <tr class="{{ !$user->is_active ? 'table-secondary' : '' }}">
-                            <td>{{ $users->firstItem() + $index }}</td>
-                            <td>{{ $user->name }}</td>
-                            <td>{{ $user->email }}</td>
-                            <td>{{ $user->nip ?? '-' }}</td>
-                            <td>{{ $user->jabatan ?? '-' }}</td>
+                        <tr>
+                            <td style="color:#a0aec0; font-size:12px;">
+                                {{ $users->firstItem() + $index }}
+                            </td>
                             <td>
-                                @foreach ($user->roles as $role)
-                                    <span class="badge badge-primary mr-1">
-                                        {{ $role->name }}
-                                    </span>
-                                @endforeach
+                                <div style="display:flex; align-items:center; gap:12px;">
+                                    <div
+                                        style="width:38px; height:38px; border-radius:50%;
+                                                background:linear-gradient(135deg,#006b3f,#00a65a);
+                                                color:#fff; font-size:15px; font-weight:700;
+                                                display:flex; align-items:center;
+                                                justify-content:center; flex-shrink:0;">
+                                        {{ strtoupper(substr($user->name, 0, 1)) }}
+                                    </div>
+                                    <div>
+                                        <div
+                                            style="font-size:13px; font-weight:600;
+                                                    color:#2d3748;">
+                                            {{ $user->name }}
+                                        </div>
+                                        <div style="font-size:11px; color:#a0aec0;">
+                                            {{ $user->email }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div style="font-size:12px; color:#2d3748;">
+                                    {{ $user->nip ?? '-' }}
+                                </div>
+                                <div style="font-size:11px; color:#a0aec0;">
+                                    {{ $user->jabatan ?? '-' }}
+                                </div>
+                            </td>
+                            <td>
+                                <div style="display:flex; flex-wrap:wrap; gap:4px;">
+                                    @foreach ($user->roles as $role)
+                                        <span
+                                            style="background:#e8f5ee; color:#006b3f;
+                                                     font-size:10px; padding:2px 8px;
+                                                     border-radius:20px; font-weight:600;
+                                                     border:1px solid #c6f6d5;">
+                                            {{ $role->name }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            </td>
+                            <td style="font-size:13px;">
+                                {{ $user->no_hp ?? '-' }}
                             </td>
                             <td class="text-center">
                                 @if ($user->is_active)
-                                    <span class="badge badge-success">Aktif</span>
+                                    <span
+                                        style="background:#d4edda; color:#155724;
+                                                 font-size:11px; padding:3px 12px;
+                                                 border-radius:20px; font-weight:600;">
+                                        <i class="fas fa-circle mr-1" style="font-size:7px;"></i>
+                                        Aktif
+                                    </span>
                                 @else
-                                    <span class="badge badge-secondary">Nonaktif</span>
+                                    <span
+                                        style="background:#e2e8f0; color:#718096;
+                                                 font-size:11px; padding:3px 12px;
+                                                 border-radius:20px; font-weight:600;">
+                                        Nonaktif
+                                    </span>
                                 @endif
                             </td>
                             <td class="text-center">
-                                <a href="{{ route('master.users.edit', $user) }}" class="btn btn-sm btn-warning">
+                                <a href="{{ route('master.users.edit', $user) }}" class="btn btn-sm btn-warning"
+                                    style="padding:4px 10px;" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 @if ($user->id !== auth()->id())
                                     <form action="{{ route('master.users.destroy', $user) }}" method="POST"
                                         class="d-inline" onsubmit="return confirm('Nonaktifkan user ini?')">
                                         @csrf @method('DELETE')
-                                        <button class="btn btn-sm btn-danger">
+                                        <button class="btn btn-sm btn-danger" style="padding:4px 10px;" title="Nonaktifkan">
                                             <i class="fas fa-ban"></i>
                                         </button>
                                     </form>
@@ -84,16 +140,19 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted">
-                                Belum ada user
+                            <td colspan="7">
+                                <x-empty-state icon="fas fa-users" message="Belum ada user"
+                                    sub="Tambahkan user menggunakan tombol di atas" />
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
-            <div class="mt-3">
+        </div>
+        @if ($users->hasPages())
+            <div class="card-footer">
                 {{ $users->links() }}
             </div>
-        </div>
+        @endif
     </div>
 @endsection
