@@ -399,7 +399,7 @@
                 <i class="fas fa-shield-alt"></i>
             </div>
 
-            <h1>HIRADC PLTU</h1>
+            <h1>SHIELD</h1>
 
             <p class="subtitle">
                 Sistem Informasi Keselamatan & Kesehatan Kerja<br>
