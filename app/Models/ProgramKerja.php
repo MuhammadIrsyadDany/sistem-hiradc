@@ -57,7 +57,12 @@ class ProgramKerja extends Model
         if ($this->status === 'closed') return;
 
         if ($this->deadline < Carbon::today() && $this->status !== 'closed') {
-            $this->update(['status' => 'overdue']);
+            $this->update(['status' => 'closed']);
         }
+    }
+
+    public function aspekBahaya()
+    {
+        return $this->belongsTo(HiradcAspekBahaya::class, 'aspek_bahaya_id');
     }
 }

@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
         | FORCE HTTPS UNTUK NGROK
         |--------------------------------------------------------------------------
         */
-        URL::forceScheme('https');
+        // URL::forceScheme('https');
 
         /*
         |--------------------------------------------------------------------------

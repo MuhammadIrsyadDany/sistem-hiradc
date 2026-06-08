@@ -103,4 +103,9 @@ class LiveAudit extends Model
         if ($total === 0) return 0;
         return round(($ya / $total) * 100);
     }
+
+    public function fotos()
+    {
+        return $this->hasMany(LiveAuditFoto::class, 'live_audit_id');
+    }
 }

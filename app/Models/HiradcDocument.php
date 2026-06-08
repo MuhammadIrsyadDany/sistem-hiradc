@@ -11,23 +11,14 @@ class HiradcDocument extends Model
 
     protected $fillable = [
         'uploaded_by',
-        'judul',
+        'nama_area',
         'unit',
         'divisi',
         'area_lokasi',
         'penanggung_jawab',
+        'no_dokumen',
+        'tahun',
         'file_path',
-        'status',
-        'validated_by_v1',
-        'validated_by_v2',
-        'validated_at_v1',
-        'validated_at_v2',
-        'catatan_penolakan',
-    ];
-
-    protected $casts = [
-        'validated_at_v1' => 'datetime',
-        'validated_at_v2' => 'datetime',
     ];
 
     public function uploader()
@@ -35,14 +26,10 @@ class HiradcDocument extends Model
         return $this->belongsTo(User::class, 'uploaded_by');
     }
 
-    public function validatorV1()
+    public function aktivitas()
     {
-        return $this->belongsTo(User::class, 'validated_by_v1');
-    }
-
-    public function validatorV2()
-    {
-        return $this->belongsTo(User::class, 'validated_by_v2');
+        return $this->hasMany(HiradcAktivitas::class, 'hiradc_id')
+            ->orderBy('urutan');
     }
 
     public function programKerja()
@@ -50,15 +37,21 @@ class HiradcDocument extends Model
         return $this->hasMany(ProgramKerja::class, 'hiradc_id');
     }
 
-    public function getStatusBadgeAttribute()
+    public function getTotalAspekAttribute(): int
     {
-        return match ($this->status) {
-            'draft'      => '<span class="badge badge-secondary">Draft</span>',
-            'pending_v1' => '<span class="badge badge-warning">Menunggu Validator 1</span>',
-            'pending_v2' => '<span class="badge badge-info">Menunggu Validator 2</span>',
-            'approved'   => '<span class="badge badge-success">Disetujui</span>',
-            'rejected'   => '<span class="badge badge-danger">Ditolak</span>',
-            default      => '<span class="badge badge-secondary">-</span>',
-        };
+        return $this->aktivitas->sum(fn($a) => $a->aspekBahaya->count());
+    }
+
+    public function getRisikoDistribusiAttribute(): array
+    {
+        $aspeks = $this->aktivitas->flatMap->aspekBahaya;
+
+        return [
+            'rendah'        => $aspeks->where('level_risiko', 'rendah')->count(),
+            'moderat'       => $aspeks->where('level_risiko', 'moderat')->count(),
+            'tinggi'        => $aspeks->where('level_risiko', 'tinggi')->count(),
+            'sangat_tinggi' => $aspeks->where('level_risiko', 'sangat_tinggi')->count(),
+            'ekstrim'       => $aspeks->where('level_risiko', 'ekstrim')->count(),
+        ];
     }
 }
