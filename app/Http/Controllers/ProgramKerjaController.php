@@ -31,9 +31,14 @@ class ProgramKerjaController extends Controller
         abort_if(Gate::denies('program_kerja.create'), 403);
 
         $hiradcId = $request->query('hiradc_id');
-        $hiradc = HiradcDocument::findOrFail($hiradcId);
+        $aspekId  = $request->query('aspek_id');
 
-        return view('program-kerja.create', compact('hiradc'));
+        $hiradc = HiradcDocument::findOrFail($hiradcId);
+        $aspek  = $aspekId
+            ? \App\Models\HiradcAspekBahaya::find($aspekId)
+            : null;
+
+        return view('program-kerja.create', compact('hiradc', 'aspek'));
     }
 
     public function store(Request $request)
@@ -42,6 +47,7 @@ class ProgramKerjaController extends Controller
 
         $validated = $request->validate([
             'hiradc_id'           => 'required|exists:hiradc_documents,id',
+            'aspek_bahaya_id'     => 'nullable|exists:hiradc_aspek_bahaya,id',
             'nama_program'        => 'required|string|max:255',
             'pengendalian_risiko' => 'nullable|string',
             'pic'                 => 'required|string|max:255',

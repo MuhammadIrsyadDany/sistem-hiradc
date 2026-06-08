@@ -2,8 +2,12 @@
 @section('title', 'Detail HIRADC')
 
 @section('content_header')
-    <x-page-header title="Detail Dokumen HIRADC" subtitle="Informasi lengkap dokumen identifikasi bahaya dan penilaian risiko"
-        icon="fas fa-file-alt" backUrl="{{ route('hiradc.index') }}">
+    <x-page-header title="Detail HIRADC — {{ $hiradc->nama_area }}"
+        subtitle="Identifikasi bahaya, penilaian risiko, dan pengendalian" icon="fas fa-file-alt"
+        backUrl="{{ route('hiradc.index') }}">
+        <a href="{{ Storage::url($hiradc->file_path) }}" target="_blank" class="btn btn-secondary">
+            <i class="fas fa-download mr-1"></i> Download File
+        </a>
     </x-page-header>
 @endsection
 
@@ -12,458 +16,506 @@
         <x-alert type="success">{{ session('success') }}</x-alert>
     @endif
 
-    {{-- Status Banner --}}
-    @php
-        $bannerConfig = [
-            'approved' => [
-                'bg' => 'linear-gradient(135deg,#d4edda,#c3e6cb)',
-                'border' => '#00a65a',
-                'icon' => 'fas fa-check-circle',
-                'iconBg' => '#00a65a',
-                'title' => 'Dokumen Disetujui',
-                'sub' => 'Dokumen telah mendapat persetujuan dari semua validator',
-            ],
-            'rejected' => [
-                'bg' => 'linear-gradient(135deg,#f8d7da,#f5c6cb)',
-                'border' => '#dc3545',
-                'icon' => 'fas fa-times-circle',
-                'iconBg' => '#dc3545',
-                'title' => 'Dokumen Ditolak',
-                'sub' => 'Dokumen perlu diperbaiki sesuai catatan validator',
-            ],
-            'pending_v1' => [
-                'bg' => 'linear-gradient(135deg,#fff3cd,#ffeeba)',
-                'border' => '#f0a500',
-                'icon' => 'fas fa-clock',
-                'iconBg' => '#f0a500',
-                'title' => 'Menunggu Validator 1',
-                'sub' => 'Dokumen sedang menunggu review dari Asisten Manajer K3',
-            ],
-            'pending_v2' => [
-                'bg' => 'linear-gradient(135deg,#cce5ff,#b8daff)',
-                'border' => '#17a2b8',
-                'icon' => 'fas fa-clock',
-                'iconBg' => '#17a2b8',
-                'title' => 'Menunggu Validator 2',
-                'sub' => 'Dokumen sedang menunggu review dari Senior Manager',
-            ],
-        ];
-        $banner = $bannerConfig[$hiradc->status] ?? null;
-    @endphp
-
-    @if ($banner)
-        <div
-            style="background:{{ $banner['bg'] }};
-                    border:2px solid {{ $banner['border'] }};
-                    border-radius:12px; padding:16px 20px;
-                    margin-bottom:20px;
-                    display:flex; align-items:center; gap:14px;">
-            <div
-                style="width:48px; height:48px; border-radius:12px;
-                        background:{{ $banner['iconBg'] }};
-                        display:flex; align-items:center;
-                        justify-content:center; flex-shrink:0;">
-                <i class="{{ $banner['icon'] }}" style="color:#fff; font-size:22px;"></i>
-            </div>
-            <div style="flex:1;">
-                <div style="font-weight:700; font-size:15px;
-                            color:#1a202c;">
-                    {{ $banner['title'] }}
-                </div>
-                <div style="font-size:12px; color:#718096;">
-                    {{ $banner['sub'] }}
-                </div>
-                @if ($hiradc->catatan_penolakan)
-                    <div
-                        style="margin-top:8px; font-size:13px;
-                                color:#721c24; font-weight:600;">
-                        Catatan: {{ $hiradc->catatan_penolakan }}
-                    </div>
-                @endif
-            </div>
-        </div>
-    @endif
-
-    <div class="row">
-        {{-- Kolom Kiri --}}
-        <div class="col-md-8">
-
-            {{-- Info Dokumen --}}
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-file-alt mr-2" style="color:#006b3f;"></i>
-                        Informasi Dokumen
-                    </h3>
-                </div>
-                <div class="card-body">
-                    {{-- Judul --}}
-                    <div
-                        style="background:#f8fafc; border-radius:10px;
-                                padding:16px; margin-bottom:20px;">
-                        <div
-                            style="font-size:18px; font-weight:700;
-                                    color:#1a202c; margin-bottom:8px;">
-                            {{ $hiradc->judul }}
-                        </div>
-                        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                            {!! $hiradc->status_badge !!}
-                            <span
-                                style="background:#e8f5ee; color:#006b3f;
-                                         font-size:11px; padding:3px 10px;
-                                         border-radius:20px; font-weight:600;">
-                                <i class="fas fa-calendar mr-1"></i>
-                                {{ $hiradc->created_at->format('d M Y') }}
-                            </span>
-                        </div>
-                    </div>
-
-                    {{-- Detail Grid --}}
-                    <div class="row">
+    {{-- Info Header --}}
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div style="display:grid; grid-template-columns:1fr 1fr;
+                                gap:12px;">
                         @php
-                            $details = [
-                                ['icon' => 'fas fa-industry', 'label' => 'Unit', 'value' => $hiradc->unit ?? '-'],
-                                [
-                                    'icon' => 'fas fa-sitemap',
-                                    'label' => 'Divisi/Bidang',
-                                    'value' => $hiradc->divisi ?? '-',
-                                ],
-                                [
-                                    'icon' => 'fas fa-map-marker-alt',
-                                    'label' => 'Area/Lokasi',
-                                    'value' => $hiradc->area_lokasi ?? '-',
-                                ],
-                                [
-                                    'icon' => 'fas fa-user-tie',
-                                    'label' => 'Penanggung Jawab',
-                                    'value' => $hiradc->penanggung_jawab ?? '-',
-                                ],
-                                [
-                                    'icon' => 'fas fa-user',
-                                    'label' => 'Diupload Oleh',
-                                    'value' => $hiradc->uploader->name,
-                                ],
-                                [
-                                    'icon' => 'fas fa-calendar-alt',
-                                    'label' => 'Tanggal Upload',
-                                    'value' => $hiradc->created_at->format('d M Y H:i'),
-                                ],
+                            $infos = [
+                                ['label' => 'Nama Area', 'value' => $hiradc->nama_area],
+                                ['label' => 'Unit', 'value' => $hiradc->unit ?? '-'],
+                                ['label' => 'Divisi/Bidang', 'value' => $hiradc->divisi ?? '-'],
+                                ['label' => 'No Dokumen', 'value' => $hiradc->no_dokumen ?? '-'],
+                                ['label' => 'Tahun', 'value' => $hiradc->tahun ?? '-'],
+                                ['label' => 'Penanggung Jawab', 'value' => $hiradc->penanggung_jawab ?? '-'],
                             ];
                         @endphp
-                        @foreach ($details as $d)
-                            <div class="col-md-6 mb-3">
-                                <div style="display:flex; gap:12px; align-items:flex-start;">
-                                    <div
-                                        style="width:34px; height:34px; border-radius:8px;
-                                                background:#e8f5ee; display:flex;
-                                                align-items:center; justify-content:center;
-                                                flex-shrink:0;">
-                                        <i class="{{ $d['icon'] }}" style="color:#006b3f; font-size:13px;"></i>
-                                    </div>
-                                    <div>
-                                        <div
-                                            style="font-size:10px; color:#a0aec0;
-                                                    font-weight:700; text-transform:uppercase;
-                                                    letter-spacing:0.5px;">
-                                            {{ $d['label'] }}
-                                        </div>
-                                        <div
-                                            style="font-size:13px; font-weight:500;
-                                                    color:#2d3748; margin-top:2px;">
-                                            {{ $d['value'] }}
-                                        </div>
-                                    </div>
+                        @foreach ($infos as $info)
+                            <div>
+                                <div
+                                    style="font-size:10px; color:#a0aec0; font-weight:700;
+                                            text-transform:uppercase; letter-spacing:0.5px;">
+                                    {{ $info['label'] }}
+                                </div>
+                                <div style="font-size:13px; font-weight:500; color:#2d3748;">
+                                    {{ $info['value'] }}
                                 </div>
                             </div>
                         @endforeach
                     </div>
+                </div>
 
-                    {{-- Download Button --}}
+                {{-- Distribusi Risiko --}}
+                <div class="col-md-4">
                     <div
-                        style="background:#f0faf4; border-radius:10px;
-                                padding:14px 16px; display:flex;
-                                justify-content:space-between; align-items:center;">
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <div
-                                style="width:38px; height:38px; border-radius:8px;
-                                        background:#006b3f; display:flex;
-                                        align-items:center; justify-content:center;">
-                                <i class="fas fa-file-alt" style="color:#fff; font-size:16px;"></i>
-                            </div>
-                            <div>
-                                <div
-                                    style="font-size:13px; font-weight:600;
-                                            color:#2d3748;">
-                                    File Dokumen HIRADC
-                                </div>
-                                <div style="font-size:11px; color:#a0aec0;">
-                                    {{ strtoupper(pathinfo($hiradc->file_path, PATHINFO_EXTENSION)) }}
-                                    format
-                                </div>
-                            </div>
-                        </div>
-                        <a href="{{ Storage::url($hiradc->file_path) }}" target="_blank" class="btn btn-primary"
-                            style="padding:8px 18px;">
-                            <i class="fas fa-download mr-1"></i>
-                            Download
-                        </a>
+                        style="font-size:11px; color:#a0aec0; font-weight:700;
+                                text-transform:uppercase; letter-spacing:0.5px;
+                                margin-bottom:10px;">
+                        Distribusi Level Risiko
                     </div>
-                </div>
-            </div>
-
-            {{-- Program Kerja --}}
-            @if ($hiradc->status === 'approved')
-                <div class="card mb-3">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h3 class="card-title">
-                            <i class="fas fa-tasks mr-2" style="color:#006b3f;"></i>
-                            Program Kerja
-                            <span
-                                style="font-size:12px; color:#a0aec0;
-                                         font-weight:400;">
-                                ({{ $hiradc->programKerja->count() }} program)
-                            </span>
-                        </h3>
-                        @can('program_kerja.create')
-                            <a href="{{ route('program-kerja.create', ['hiradc_id' => $hiradc->id]) }}"
-                                class="btn btn-sm btn-primary">
-                                <i class="fas fa-plus mr-1"></i> Tambah
-                            </a>
-                        @endcan
-                    </div>
-                    <div class="card-body p-0">
-                        @forelse($hiradc->programKerja as $program)
-                            <div style="padding:14px 20px;
-                                        border-bottom:1px solid #f0f4f8;
-                                        display:flex; justify-content:space-between;
-                                        align-items:center; transition:background 0.15s;"
-                                onmouseover="this.style.background='#f8fafc'"
-                                onmouseout="this.style.background='transparent'">
-                                <div style="flex:1;">
-                                    <div
-                                        style="font-size:13px; font-weight:600;
-                                                color:#2d3748; margin-bottom:4px;">
-                                        {{ $program->nama_program }}
-                                    </div>
-                                    <div
-                                        style="display:flex; gap:12px;
-                                                font-size:11px; color:#a0aec0;">
-                                        <span>
-                                            <i class="fas fa-user mr-1"></i>
-                                            {{ $program->pic }}
-                                        </span>
-                                        <span>
-                                            <i class="fas fa-calendar mr-1"></i>
-                                            {{ $program->deadline->format('d M Y') }}
-                                        </span>
-                                        @if ($program->status !== 'closed' && $program->deadline < now())
-                                            <span style="color:#dc3545; font-weight:600;">
-                                                <i class="fas fa-exclamation-triangle mr-1"></i>
-                                                Overdue
-                                            </span>
-                                        @endif
-                                    </div>
-                                </div>
-                                <div style="display:flex; align-items:center; gap:10px;">
-                                    {!! $program->status_badge !!}
-                                    <a href="{{ route('program-kerja.show', $program) }}" class="btn btn-sm btn-primary">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        @empty
-                            <x-empty-state icon="fas fa-tasks" message="Belum ada program kerja"
-                                sub="Tambahkan program kerja dari dokumen HIRADC ini" />
-                        @endforelse
-                    </div>
-                </div>
-            @endif
-        </div>
-
-        {{-- Kolom Kanan --}}
-        <div class="col-md-4">
-
-            {{-- Timeline Validasi --}}
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-stream mr-2" style="color:#006b3f;"></i>
-                        Alur Persetujuan
-                    </h3>
-                </div>
-                <div class="card-body">
                     @php
-                        $steps = [
-                            [
-                                'label' => 'Upload',
-                                'user' => $hiradc->uploader->name,
-                                'time' => $hiradc->created_at->format('d M Y H:i'),
-                                'done' => true,
-                                'color' => '#17a2b8',
-                                'icon' => 'fas fa-upload',
-                            ],
-                            [
-                                'label' => 'Validator 1',
-                                'user' => $hiradc->validatorV1->name ?? null,
-                                'time' => $hiradc->validated_at_v1?->format('d M Y H:i'),
-                                'done' => !is_null($hiradc->validated_by_v1),
-                                'color' => '#f0a500',
-                                'icon' => 'fas fa-check',
-                            ],
-                            [
-                                'label' => 'Validator 2',
-                                'user' => $hiradc->validatorV2->name ?? null,
-                                'time' => $hiradc->validated_at_v2?->format('d M Y H:i'),
-                                'done' => !is_null($hiradc->validated_by_v2),
-                                'color' => '#006b3f',
-                                'icon' => 'fas fa-check-double',
-                            ],
-                            [
-                                'label' => 'Approved',
-                                'user' => $hiradc->status === 'approved' ? 'Dokumen Aktif' : null,
-                                'time' => null,
-                                'done' => $hiradc->status === 'approved',
-                                'color' => '#00a65a',
-                                'icon' => 'fas fa-flag',
-                            ],
+                        $dist = $hiradc->risiko_distribusi;
+                        $risikoConfig = [
+                            'rendah' => ['label' => 'Rendah', 'color' => '#00a65a'],
+                            'moderat' => ['label' => 'Moderat', 'color' => '#f0a500'],
+                            'tinggi' => ['label' => 'Tinggi', 'color' => '#fd7e14'],
+                            'sangat_tinggi' => ['label' => 'Sangat Tinggi', 'color' => '#dc3545'],
+                            'ekstrim' => ['label' => 'Ekstrim', 'color' => '#2d3748'],
                         ];
                     @endphp
-
-                    @foreach ($steps as $i => $step)
-                        <div style="display:flex; gap:14px; align-items:flex-start;">
+                    @foreach ($risikoConfig as $key => $cfg)
+                        @if ($dist[$key] > 0)
                             <div
-                                style="display:flex; flex-direction:column;
-                                        align-items:center;">
-                                <div
-                                    style="width:36px; height:36px; border-radius:50%;
-                                            background:{{ $step['done'] ? $step['color'] : '#e2e8f0' }};
-                                            display:flex; align-items:center;
-                                            justify-content:center; flex-shrink:0;">
-                                    <i class="{{ $step['icon'] }}" style="color:#fff; font-size:13px;"></i>
-                                </div>
-                                @if ($i < count($steps) - 1)
-                                    <div
-                                        style="width:2px; height:32px;
-                                                background:{{ $step['done'] ? $step['color'] . '40' : '#e2e8f0' }};
-                                                margin:4px 0;">
-                                    </div>
-                                @endif
+                                style="display:flex; justify-content:space-between;
+                                        align-items:center; margin-bottom:6px;">
+                                <span style="font-size:12px; color:#4a5568;">
+                                    <span
+                                        style="display:inline-block; width:8px;
+                                                 height:8px; border-radius:50%;
+                                                 background:{{ $cfg['color'] }};
+                                                 margin-right:6px;"></span>
+                                    {{ $cfg['label'] }}
+                                </span>
+                                <span
+                                    style="background:{{ $cfg['color'] }}20;
+                                             color:{{ $cfg['color'] }};
+                                             font-size:12px; font-weight:700;
+                                             padding:2px 10px; border-radius:20px;">
+                                    {{ $dist[$key] }}
+                                </span>
                             </div>
-                            <div style="padding-top:6px; flex:1;">
-                                <div
-                                    style="font-size:13px; font-weight:600;
-                                            color:{{ $step['done'] ? '#2d3748' : '#a0aec0' }};">
-                                    {{ $step['label'] }}
-                                </div>
-                                @if ($step['done'] && $step['user'])
-                                    <div style="font-size:11px; color:#718096;">
-                                        {{ $step['user'] }}
-                                    </div>
-                                    @if ($step['time'])
-                                        <div style="font-size:10px; color:#a0aec0;">
-                                            {{ $step['time'] }}
-                                        </div>
-                                    @endif
-                                @else
-                                    <div style="font-size:11px; color:#cbd5e0;">
-                                        Menunggu...
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-                        @if ($i < count($steps) - 1)
-                            <div style="height:6px;"></div>
                         @endif
                     @endforeach
+                    @if (array_sum($dist) === 0)
+                        <div style="font-size:12px; color:#a0aec0;">
+                            Belum ada aspek bahaya
+                        </div>
+                    @endif
                 </div>
             </div>
-
-            {{-- Aksi Validator 1 --}}
-            @if ($hiradc->status === 'pending_v1')
-                @can('hiradc.validate_v1')
-                    <div class="card mb-3" style="border:2px solid #f0a500 !important;">
-                        <div class="card-header"
-                            style="background:#fffbf0 !important;
-                                    border-bottom:2px solid #ffeeba !important;">
-                            <h3 class="card-title" style="color:#856404 !important;">
-                                <i class="fas fa-user-check mr-2"></i>
-                                Aksi Validator 1
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <form action="{{ route('hiradc.validate-v1', $hiradc) }}" method="POST">
-                                @csrf
-                                <div class="form-group">
-                                    <label style="font-size:12px;">
-                                        Catatan (isi jika menolak)
-                                    </label>
-                                    <textarea name="catatan_penolakan" class="form-control" rows="2" placeholder="Tuliskan catatan..."></textarea>
-                                </div>
-                                <div class="row" style="gap:0;">
-                                    <div class="col-6 pr-1">
-                                        <button type="submit" name="action" value="approve"
-                                            class="btn btn-success btn-block">
-                                            <i class="fas fa-check mr-1"></i>
-                                            Setujui
-                                        </button>
-                                    </div>
-                                    <div class="col-6 pl-1">
-                                        <button type="submit" name="action" value="reject"
-                                            class="btn btn-outline-danger btn-block">
-                                            <i class="fas fa-times mr-1"></i>
-                                            Tolak
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                @endcan
-            @endif
-
-            {{-- Aksi Validator 2 --}}
-            @if ($hiradc->status === 'pending_v2')
-                @can('hiradc.validate_v2')
-                    <div class="card mb-3" style="border:2px solid #006b3f !important;">
-                        <div class="card-header"
-                            style="background:#e8f5ee !important;
-                                    border-bottom:2px solid #c6f6d5 !important;">
-                            <h3 class="card-title" style="color:#006b3f !important;">
-                                <i class="fas fa-user-shield mr-2"></i>
-                                Aksi Validator 2
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <form action="{{ route('hiradc.validate-v2', $hiradc) }}" method="POST">
-                                @csrf
-                                <div class="form-group">
-                                    <label style="font-size:12px;">
-                                        Catatan (isi jika menolak)
-                                    </label>
-                                    <textarea name="catatan_penolakan" class="form-control" rows="2" placeholder="Tuliskan catatan..."></textarea>
-                                </div>
-                                <div class="row" style="gap:0;">
-                                    <div class="col-6 pr-1">
-                                        <button type="submit" name="action" value="approve"
-                                            class="btn btn-success btn-block">
-                                            <i class="fas fa-check-double mr-1"></i>
-                                            Setujui
-                                        </button>
-                                    </div>
-                                    <div class="col-6 pl-1">
-                                        <button type="submit" name="action" value="reject"
-                                            class="btn btn-outline-danger btn-block">
-                                            <i class="fas fa-times mr-1"></i>
-                                            Tolak
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                @endcan
-            @endif
-
         </div>
     </div>
+
+    {{-- Tabel HIRADC + Form Tambah --}}
+    <div class="card mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="card-title">
+                <i class="fas fa-table mr-2" style="color:#006b3f;"></i>
+                Data Aktivitas & Aspek Bahaya
+            </h3>
+            @can('hiradc.create')
+                <button class="btn btn-sm btn-primary" onclick="toggleFormAktivitas()">
+                    <i class="fas fa-plus mr-1"></i> Tambah Aktivitas
+                </button>
+            @endcan
+        </div>
+
+        {{-- Form Tambah Aktivitas --}}
+        @can('hiradc.create')
+            <div id="formAktivitas"
+                style="display:none;
+                 background:#f0faf4; border-bottom:2px solid #c6f6d5;
+                 padding:16px 20px;">
+                <form action="{{ route('hiradc.aktivitas.store', $hiradc) }}" method="POST">
+                    @csrf
+                    <div
+                        style="font-size:13px; font-weight:700; color:#006b3f;
+                                margin-bottom:12px;">
+                        <i class="fas fa-running mr-1"></i>
+                        Tambah Aktivitas Baru
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="form-group mb-2">
+                                <label style="font-size:12px;">
+                                    Nama Aktivitas *
+                                </label>
+                                <input type="text" name="nama_aktivitas" class="form-control form-control-sm"
+                                    placeholder="Contoh: Dry Unloading Fly Ash" required>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group mb-2">
+                                <label style="font-size:12px;">
+                                    Sumber Bahaya *
+                                </label>
+                                <select name="sumber_bahaya" class="form-control form-control-sm" required>
+                                    @foreach ($sumberOptions as $val => $label)
+                                        <option value="{{ $val }}">{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group mb-2">
+                                <label style="font-size:12px;">Kondisi *</label>
+                                <select name="kondisi" class="form-control form-control-sm" required>
+                                    @foreach ($kondisiOptions as $val => $label)
+                                        <option value="{{ $val }}">{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <div class="form-group mb-2 w-100">
+                                <label style="font-size:12px;">&nbsp;</label>
+                                <div style="display:flex; gap:6px;">
+                                    <button type="submit" class="btn btn-success btn-sm flex-1" style="flex:1;">
+                                        <i class="fas fa-save"></i> Simpan
+                                    </button>
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="toggleFormAktivitas()">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        @endcan
+
+        <div class="card-body p-0">
+            @if ($hiradc->aktivitas->isEmpty())
+                <x-empty-state icon="fas fa-running" message="Belum ada aktivitas"
+                    sub="Klik 'Tambah Aktivitas' untuk mulai mengisi data HIRADC" />
+            @else
+                {{-- Loop per Aktivitas --}}
+                @foreach ($hiradc->aktivitas as $aktivitas)
+                    <div style="border-bottom:2px solid #e8f5ee;">
+                        {{-- Header Aktivitas --}}
+                        <div
+                            style="background:linear-gradient(135deg,#f0faf4,#e8f5ee);
+                                    padding:12px 20px;
+                                    display:flex; justify-content:space-between;
+                                    align-items:center;">
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <div
+                                    style="width:32px; height:32px; border-radius:8px;
+                                            background:#006b3f; color:#fff; font-size:13px;
+                                            font-weight:700; display:flex; align-items:center;
+                                            justify-content:center;">
+                                    {{ $loop->iteration }}
+                                </div>
+                                <div>
+                                    <div
+                                        style="font-size:14px; font-weight:700;
+                                                color:#004d2e;">
+                                        {{ $aktivitas->nama_aktivitas }}
+                                    </div>
+                                    <div style="font-size:11px; color:#718096;">
+                                        Sumber: {{ $aktivitas->sumber_bahara_label }}
+                                        &nbsp;·&nbsp;
+                                        Kondisi: {{ $aktivitas->kondisi_label }}
+                                        &nbsp;·&nbsp;
+                                        {{ $aktivitas->aspekBahaya->count() }} aspek bahaya
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display:flex; gap:8px; align-items:center;">
+                                @can('hiradc.create')
+                                    <button class="btn btn-sm btn-outline-primary"
+                                        onclick="toggleFormAspek({{ $aktivitas->id }})"
+                                        style="font-size:11px; padding:4px 10px;">
+                                        <i class="fas fa-plus mr-1"></i>
+                                        Tambah Aspek Bahaya
+                                    </button>
+                                    <form action="{{ route('hiradc.aktivitas.destroy', [$hiradc, $aktivitas]) }}"
+                                        method="POST" class="d-inline"
+                                        onsubmit="return confirm('Hapus aktivitas ini beserta semua aspek bahayannya?')">
+                                        @csrf @method('DELETE')
+                                        <button class="btn btn-sm btn-outline-danger" style="font-size:11px; padding:4px 10px;">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                @endcan
+                            </div>
+                        </div>
+
+                        {{-- Form Tambah Aspek Bahaya --}}
+                        @can('hiradc.create')
+                            <div id="formAspek{{ $aktivitas->id }}"
+                                style="display:none; background:#fffbf0;
+                                        border-bottom:1px solid #fde68a;
+                                        padding:14px 20px;">
+                                <form action="{{ route('hiradc.aspek-bahaya.store', $aktivitas) }}" method="POST">
+                                    @csrf
+                                    <div
+                                        style="font-size:12px; font-weight:700;
+                                                color:#856404; margin-bottom:10px;">
+                                        <i class="fas fa-biohazard mr-1"></i>
+                                        Tambah Aspek Bahaya untuk:
+                                        {{ $aktivitas->nama_aktivitas }}
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group mb-2">
+                                                <label style="font-size:11px;">
+                                                    Potensi/Aktual Aspek Lingkungan
+                                                </label>
+                                                <textarea name="potensi_aspek_lingkungan" class="form-control form-control-sm" rows="2"
+                                                    placeholder="Contoh: Area kerja berdebu"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group mb-2">
+                                                <label style="font-size:11px;">
+                                                    Potensi/Aktual Bahaya K3 *
+                                                </label>
+                                                <textarea name="potensi_bahaya_k3" class="form-control form-control-sm" rows="2"
+                                                    placeholder="Contoh: Terpapar debu fly ash" required></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group mb-2">
+                                                <label style="font-size:11px;">
+                                                    Peraturan Terkait
+                                                </label>
+                                                <input type="text" name="peraturan_terkait"
+                                                    class="form-control form-control-sm"
+                                                    placeholder="Contoh: Permenaker No.5 Tahun 2018">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="form-group mb-2">
+                                                <label style="font-size:11px;">
+                                                    Pengendalian yang Ada Saat Ini
+                                                </label>
+                                                <textarea name="pengendalian_existing" class="form-control form-control-sm" rows="2"
+                                                    placeholder="Contoh: APD masker, wearpack"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group mb-2">
+                                                <label style="font-size:11px;">
+                                                    Level Risiko Awal *
+                                                </label>
+                                                <select name="level_risiko" class="form-control form-control-sm" required>
+                                                    @foreach ($levelOptions as $val => $label)
+                                                        <option value="{{ $val }}">
+                                                            {{ $label }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 d-flex align-items-end">
+                                            <div class="form-group mb-2 w-100">
+                                                <label style="font-size:11px;">&nbsp;</label>
+                                                <div style="display:flex; gap:6px;">
+                                                    <button type="submit" class="btn btn-warning btn-sm" style="flex:1;">
+                                                        <i class="fas fa-save mr-1"></i>
+                                                        Simpan
+                                                    </button>
+                                                    <button type="button" class="btn btn-secondary btn-sm"
+                                                        onclick="toggleFormAspek({{ $aktivitas->id }})">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        @endcan
+
+                        {{-- Tabel Aspek Bahaya --}}
+                        @if ($aktivitas->aspekBahaya->isNotEmpty())
+                            <table class="table table-sm mb-0" style="font-size:12px;">
+                                <thead>
+                                    <tr style="background:#fafafa;">
+                                        <th width="3%">#</th>
+                                        <th width="18%">Aspek Lingkungan</th>
+                                        <th width="18%">Bahaya K3</th>
+                                        <th width="18%">Peraturan</th>
+                                        <th width="15%">Pengendalian Ada</th>
+                                        <th width="8%" class="text-center">
+                                            Risiko Awal
+                                        </th>
+                                        <th width="8%" class="text-center">
+                                            Risiko Akhir
+                                        </th>
+                                        <th width="12%" class="text-center">
+                                            Aksi
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($aktivitas->aspekBahaya as $aspek)
+                                        <tr>
+                                            <td style="color:#a0aec0;">
+                                                {{ $loop->iteration }}
+                                            </td>
+                                            <td>
+                                                {{ $aspek->potensi_aspek_lingkungan ?? '-' }}
+                                            </td>
+                                            <td style="font-weight:500; color:#2d3748;">
+                                                {{ $aspek->potensi_bahaya_k3 }}
+                                            </td>
+                                            <td style="color:#718096;">
+                                                {{ $aspek->peraturan_terkait ?? '-' }}
+                                            </td>
+                                            <td style="color:#718096;">
+                                                {{ $aspek->pengendalian_existing ?? '-' }}
+                                            </td>
+                                            <td class="text-center">
+                                                {!! $aspek->level_risiko_badge !!}
+                                            </td>
+                                            <td class="text-center">
+                                                @if ($aspek->programKerja->where('status', 'closed')->isNotEmpty())
+                                                    @if ($aspek->level_risiko_akhir)
+                                                        <div>
+                                                            {!! $aspek->level_risiko_akhir_badge !!}
+                                                            @if ($aspek->status_penurunan === 'turun')
+                                                                <div style="font-size:10px; color:#00a65a;">
+                                                                    <i class="fas fa-arrow-down"></i>
+                                                                    Turun
+                                                                </div>
+                                                            @endif
+                                                        </div>
+                                                    @else
+                                                        <button class="btn btn-xs btn-outline-success"
+                                                            style="font-size:10px; padding:2px 8px;"
+                                                            onclick="toggleUpdateRisiko({{ $aspek->id }})">
+                                                            <i class="fas fa-edit"></i>
+                                                            Update
+                                                        </button>
+                                                    @endif
+                                                @else
+                                                    <span style="font-size:10px; color:#cbd5e0;">
+                                                        Belum ada program selesai
+                                                    </span>
+                                                @endif
+                                            </td>
+                                            <td class="text-center">
+                                                @can('hiradc.create')
+                                                    <a href="{{ route('program-kerja.create', ['hiradc_id' => $hiradc->id, 'aspek_id' => $aspek->id]) }}"
+                                                        class="btn btn-xs btn-primary"
+                                                        style="font-size:10px; padding:2px 8px;" title="Tambah Program Kerja">
+                                                        <i class="fas fa-plus"></i> PK
+                                                    </a>
+                                                    <form action="{{ route('hiradc.aspek-bahaya.destroy', $aspek) }}"
+                                                        method="POST" class="d-inline"
+                                                        onsubmit="return confirm('Hapus aspek bahaya ini?')">
+                                                        @csrf @method('DELETE')
+                                                        <button class="btn btn-xs btn-danger"
+                                                            style="font-size:10px; padding:2px 8px;">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                @endcan
+                                            </td>
+                                        </tr>
+
+                                        {{-- Form Update Risiko Akhir --}}
+                                        <tr id="updateRisiko{{ $aspek->id }}"
+                                            style="display:none; background:#f0faf4;">
+                                            <td colspan="8" style="padding:10px 16px;">
+                                                <form
+                                                    action="{{ route('hiradc.aspek-bahaya.update-risiko-akhir', $aspek) }}"
+                                                    method="POST" style="display:flex; gap:10px; align-items:center;">
+                                                    @csrf
+                                                    <span
+                                                        style="font-size:12px; color:#006b3f;
+                                                                 font-weight:600;">
+                                                        Update Level Risiko Akhir:
+                                                    </span>
+                                                    <select name="level_risiko_akhir" class="form-control form-control-sm"
+                                                        style="width:160px;">
+                                                        @foreach ($levelOptions as $val => $label)
+                                                            <option value="{{ $val }}">
+                                                                {{ $label }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    <button type="submit" class="btn btn-success btn-sm">
+                                                        <i class="fas fa-save mr-1"></i>
+                                                        Simpan
+                                                    </button>
+                                                    <button type="button" class="btn btn-secondary btn-sm"
+                                                        onclick="toggleUpdateRisiko({{ $aspek->id }})">
+                                                        Batal
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+
+                                        {{-- Program Kerja terkait aspek ini --}}
+                                        @if ($aspek->programKerja->isNotEmpty())
+                                            @foreach ($aspek->programKerja as $pk)
+                                                <tr style="background:#f8f9fa;">
+                                                    <td></td>
+                                                    <td colspan="5" style="padding:6px 14px;">
+                                                        <div
+                                                            style="display:flex;
+                                                                    align-items:center;
+                                                                    gap:8px;">
+                                                            <i class="fas fa-tasks"
+                                                                style="color:#6f42c1;
+                                                                      font-size:11px;"></i>
+                                                            <span
+                                                                style="font-size:12px;
+                                                                         color:#4a5568;
+                                                                         font-weight:500;">
+                                                                {{ $pk->nama_program }}
+                                                            </span>
+                                                            <span
+                                                                style="font-size:10px;
+                                                                         color:#a0aec0;">
+                                                                · PIC: {{ $pk->pic }}
+                                                                · Deadline:
+                                                                {{ $pk->deadline->format('d M Y') }}
+                                                            </span>
+                                                        </div>
+                                                    </td>
+                                                    <td colspan="2" class="text-center">
+                                                        {!! $pk->status_badge !!}
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <a href="{{ route('program-kerja.show', $pk) }}"
+                                                            class="btn btn-xs btn-info"
+                                                            style="font-size:10px;
+                                                                  padding:2px 8px;">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @endif
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        @else
+                            <div
+                                style="padding:16px 20px; font-size:12px;
+                                        color:#a0aec0; text-align:center;">
+                                Belum ada aspek bahaya. Klik "Tambah Aspek Bahaya" di atas.
+                            </div>
+                        @endif
+                    </div>
+                @endforeach
+            @endif
+        </div>
+    </div>
+@endsection
+
+@section('js')
+    <script>
+        function toggleFormAktivitas() {
+            const el = document.getElementById('formAktivitas');
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleFormAspek(id) {
+            const el = document.getElementById('formAspek' + id);
+            el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function toggleUpdateRisiko(id) {
+            const el = document.getElementById('updateRisiko' + id);
+            el.style.display = el.style.display === 'none' ? 'table-row' : 'none';
+        }
+    </script>
 @endsection

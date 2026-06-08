@@ -3,133 +3,232 @@
 namespace App\Http\Controllers;
 
 use App\Models\HiradcDocument;
+use App\Models\HiradcAktivitas;
+use App\Models\HiradcAspekBahaya;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 
 class HiradcController extends Controller
 {
+    // ================================================================
+    // HIRADC DOCUMENT
+    // ================================================================
+
     public function index()
     {
         abort_if(Gate::denies('hiradc.view'), 403);
-        $documents = HiradcDocument::with('uploader')
+
+        $documents = HiradcDocument::with([
+            'uploader',
+            'aktivitas.aspekBahaya',
+        ])
             ->latest()
             ->paginate(10);
+
         return view('hiradc.index', compact('documents'));
     }
 
     public function create()
     {
-        $this->authorize('hiradc.create');
+        abort_if(Gate::denies('hiradc.create'), 403);
+
         return view('hiradc.create');
     }
 
     public function store(Request $request)
     {
-        $this->authorize('hiradc.create');
+        abort_if(Gate::denies('hiradc.create'), 403);
 
         $validated = $request->validate([
-            'judul'            => 'required|string|max:255',
+            'nama_area'        => 'required|string|max:255',
             'unit'             => 'nullable|string|max:255',
             'divisi'           => 'nullable|string|max:255',
             'area_lokasi'      => 'nullable|string|max:255',
             'penanggung_jawab' => 'nullable|string|max:255',
+            'no_dokumen'       => 'nullable|string|max:100',
+            'tahun'            => 'nullable|string|max:10',
             'file'             => 'required|file|mimes:pdf,xlsx,xls|max:10240',
         ]);
 
         $filePath = $request->file('file')->store('hiradc', 'public');
 
-        HiradcDocument::create([
+        $hiradc = HiradcDocument::create([
             'uploaded_by'      => Auth::id(),
-            'judul'            => $validated['judul'],
+            'nama_area'        => $validated['nama_area'],
             'unit'             => $validated['unit'],
             'divisi'           => $validated['divisi'],
             'area_lokasi'      => $validated['area_lokasi'],
             'penanggung_jawab' => $validated['penanggung_jawab'],
+            'no_dokumen'       => $validated['no_dokumen'],
+            'tahun'            => $validated['tahun'],
             'file_path'        => $filePath,
-            'status'           => 'pending_v1',
         ]);
 
-        return redirect()->route('hiradc.index')
-            ->with('success', 'Dokumen HIRADC berhasil diupload dan menunggu validasi.');
+        return redirect()->route('hiradc.show', $hiradc)
+            ->with('success', 'Dokumen HIRADC berhasil diupload. Silakan tambahkan aktivitas dan aspek bahaya.');
     }
 
     public function show(HiradcDocument $hiradc)
     {
         abort_if(Gate::denies('hiradc.view'), 403);
-        $hiradc->load(['uploader', 'validatorV1', 'validatorV2', 'programKerja']);
-        return view('hiradc.show', compact('hiradc'));
-    }
 
-    public function validateV1(Request $request, HiradcDocument $hiradc)
-    {
-        $this->authorize('hiradc.validate_v1');
-
-        $request->validate([
-            'action'            => 'required|in:approve,reject',
-            'catatan_penolakan' => 'nullable|string',
+        $hiradc->load([
+            'uploader',
+            'aktivitas.aspekBahaya.programKerja.bukti',
+            'programKerja',
         ]);
 
-        if ($request->action === 'approve') {
-            $hiradc->update([
-                'status'           => 'pending_v2',
-                'validated_by_v1'  => Auth::id(),
-                'validated_at_v1'  => now(),
-                'catatan_penolakan' => null,
-            ]);
-            $message = 'Dokumen HIRADC disetujui oleh Validator 1.';
-        } else {
-            $hiradc->update([
-                'status'            => 'rejected',
-                'validated_by_v1'   => Auth::id(),
-                'validated_at_v1'   => now(),
-                'catatan_penolakan' => $request->catatan_penolakan,
-            ]);
-            $message = 'Dokumen HIRADC ditolak.';
-        }
+        $levelOptions = $this->getLevelOptions();
+        $sumberOptions = $this->getSumberOptions();
+        $kondisiOptions = $this->getKondisiOptions();
 
-        return redirect()->route('hiradc.show', $hiradc)
-            ->with('success', $message);
-    }
-
-    public function validateV2(Request $request, HiradcDocument $hiradc)
-    {
-        $this->authorize('hiradc.validate_v2');
-
-        $request->validate([
-            'action'            => 'required|in:approve,reject',
-            'catatan_penolakan' => 'nullable|string',
-        ]);
-
-        if ($request->action === 'approve') {
-            $hiradc->update([
-                'status'          => 'approved',
-                'validated_by_v2' => Auth::id(),
-                'validated_at_v2' => now(),
-                'catatan_penolakan' => null,
-            ]);
-            $message = 'Dokumen HIRADC telah disetujui sepenuhnya.';
-        } else {
-            $hiradc->update([
-                'status'            => 'rejected',
-                'validated_by_v2'   => Auth::id(),
-                'validated_at_v2'   => now(),
-                'catatan_penolakan' => $request->catatan_penolakan,
-            ]);
-            $message = 'Dokumen HIRADC ditolak.';
-        }
-
-        return redirect()->route('hiradc.show', $hiradc)
-            ->with('success', $message);
+        return view('hiradc.show', compact(
+            'hiradc',
+            'levelOptions',
+            'sumberOptions',
+            'kondisiOptions',
+        ));
     }
 
     public function destroy(HiradcDocument $hiradc)
     {
-        $this->authorize('hiradc.create');
+        abort_if(Gate::denies('hiradc.create'), 403);
+
         Storage::disk('public')->delete($hiradc->file_path);
         $hiradc->delete();
+
         return redirect()->route('hiradc.index')
             ->with('success', 'Dokumen HIRADC berhasil dihapus.');
+    }
+
+    // ================================================================
+    // AKTIVITAS
+    // ================================================================
+
+    public function storeAktivitas(Request $request, HiradcDocument $hiradc)
+    {
+        abort_if(Gate::denies('hiradc.create'), 403);
+
+        $validated = $request->validate([
+            'nama_aktivitas' => 'required|string|max:255',
+            'sumber_bahaya'  => 'required|in:aktivitas,peralatan,lingkungan_kerja,proses',
+            'kondisi'        => 'required|in:rutin,non_rutin,abnormal,darurat',
+        ]);
+
+        $urutan = $hiradc->aktivitas()->max('urutan') + 1;
+
+        HiradcAktivitas::create([
+            'hiradc_id'      => $hiradc->id,
+            'nama_aktivitas' => $validated['nama_aktivitas'],
+            'sumber_bahaya'  => $validated['sumber_bahaya'],
+            'kondisi'        => $validated['kondisi'],
+            'urutan'         => $urutan,
+        ]);
+
+        return redirect()->route('hiradc.show', $hiradc)
+            ->with('success', 'Aktivitas berhasil ditambahkan.');
+    }
+
+    public function destroyAktivitas(HiradcDocument $hiradc, HiradcAktivitas $aktivitas)
+    {
+        abort_if(Gate::denies('hiradc.create'), 403);
+
+        $aktivitas->delete();
+
+        return redirect()->route('hiradc.show', $hiradc)
+            ->with('success', 'Aktivitas berhasil dihapus.');
+    }
+
+    // ================================================================
+    // ASPEK BAHAYA
+    // ================================================================
+
+    public function storeAspekBahaya(Request $request, HiradcAktivitas $aktivitas)
+    {
+        abort_if(Gate::denies('hiradc.create'), 403);
+
+        $validated = $request->validate([
+            'potensi_aspek_lingkungan' => 'nullable|string',
+            'potensi_bahaya_k3'        => 'required|string',
+            'peraturan_terkait'        => 'nullable|string',
+            'pengendalian_existing'    => 'nullable|string',
+            'level_risiko'             => 'required|in:rendah,moderat,tinggi,sangat_tinggi,ekstrim',
+        ]);
+
+        HiradcAspekBahaya::create([
+            'aktivitas_id'             => $aktivitas->id,
+            'potensi_aspek_lingkungan' => $validated['potensi_aspek_lingkungan'],
+            'potensi_bahaya_k3'        => $validated['potensi_bahaya_k3'],
+            'peraturan_terkait'        => $validated['peraturan_terkait'],
+            'pengendalian_existing'    => $validated['pengendalian_existing'],
+            'level_risiko'             => $validated['level_risiko'],
+        ]);
+
+        return redirect()->route('hiradc.show', $aktivitas->hiradc)
+            ->with('success', 'Aspek bahaya berhasil ditambahkan.');
+    }
+
+    public function destroyAspekBahaya(HiradcAspekBahaya $aspek)
+    {
+        abort_if(Gate::denies('hiradc.create'), 403);
+
+        $hiradc = $aspek->aktivitas->hiradc;
+        $aspek->delete();
+
+        return redirect()->route('hiradc.show', $hiradc)
+            ->with('success', 'Aspek bahaya berhasil dihapus.');
+    }
+
+    public function updateLevelRisikoAkhir(Request $request, HiradcAspekBahaya $aspek)
+    {
+        abort_if(Gate::denies('hiradc.create'), 403);
+
+        $request->validate([
+            'level_risiko_akhir' => 'required|in:rendah,moderat,tinggi,sangat_tinggi,ekstrim',
+        ]);
+
+        $aspek->update([
+            'level_risiko_akhir' => $request->level_risiko_akhir,
+        ]);
+
+        return redirect()->route('hiradc.show', $aspek->aktivitas->hiradc)
+            ->with('success', 'Level risiko akhir berhasil diupdate.');
+    }
+
+    // ================================================================
+    // HELPERS
+    // ================================================================
+
+    private function getLevelOptions(): array
+    {
+        return [
+            'rendah'        => 'Rendah',
+            'moderat'       => 'Moderat',
+            'tinggi'        => 'Tinggi',
+            'sangat_tinggi' => 'Sangat Tinggi',
+            'ekstrim'       => 'Ekstrim',
+        ];
+    }
+
+    private function getSumberOptions(): array
+    {
+        return [
+            'aktivitas'        => 'Aktivitas',
+            'peralatan'        => 'Peralatan',
+            'lingkungan_kerja' => 'Lingkungan Kerja',
+            'proses'           => 'Proses',
+        ];
+    }
+
+    private function getKondisiOptions(): array
+    {
+        return [
+            'rutin'     => 'Rutin',
+            'non_rutin' => 'Non Rutin',
+            'abnormal'  => 'Abnormal',
+            'darurat'   => 'Darurat',
+        ];
     }
 }

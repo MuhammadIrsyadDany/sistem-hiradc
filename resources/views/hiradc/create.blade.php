@@ -2,7 +2,7 @@
 @section('title', 'Upload HIRADC')
 
 @section('content_header')
-    <x-page-header title="Upload Dokumen HIRADC" subtitle="Upload dokumen identifikasi bahaya dan penilaian risiko"
+    <x-page-header title="Upload Dokumen HIRADC" subtitle="Upload dokumen dan isi informasi dasar area HIRADC"
         icon="fas fa-file-alt" backUrl="{{ route('hiradc.index') }}">
     </x-page-header>
 @endsection
@@ -23,27 +23,49 @@
                     <form action="{{ route('hiradc.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
-                        <div class="form-group">
-                            <label>
-                                Judul Dokumen
-                                <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" name="judul" class="form-control @error('judul') is-invalid @enderror"
-                                value="{{ old('judul') }}" placeholder="Contoh: HIRADC Ash Handling Unit 1 2025">
-                            @error('judul')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <label>
+                                        Nama Area
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" name="nama_area"
+                                        class="form-control @error('nama_area') is-invalid @enderror"
+                                        value="{{ old('nama_area') }}"
+                                        placeholder="Contoh: Ash Handling, Coal Yard, Boiler">
+                                    @error('nama_area')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label>Tahun</label>
+                                    <input type="text" name="tahun" class="form-control"
+                                        value="{{ old('tahun', date('Y')) }}" placeholder="2025">
+                                </div>
+                            </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Unit</label>
-                                    <input type="text" name="unit" class="form-control"
-                                        value="{{ old('unit', 'PLTU Tanjung Awar-Awar') }}"
-                                        placeholder="Contoh: PLTU Tanjung Awar-Awar">
+                                    <label>No Dokumen</label>
+                                    <input type="text" name="no_dokumen" class="form-control"
+                                        value="{{ old('no_dokumen') }}" placeholder="Contoh: FMZ-08.1.2.1">
                                 </div>
                             </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Unit</label>
+                                    <input type="text" name="unit" class="form-control"
+                                        value="{{ old('unit', 'PLTU Tanjung Awar-Awar') }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Divisi / Bidang</label>
@@ -51,9 +73,6 @@
                                         placeholder="Contoh: Coal Handling Facility">
                                 </div>
                             </div>
-                        </div>
-
-                        <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Area / Lokasi</label>
@@ -61,13 +80,12 @@
                                         value="{{ old('area_lokasi') }}" placeholder="Contoh: Ash Handling">
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label>Penanggung Jawab</label>
-                                    <input type="text" name="penanggung_jawab" class="form-control"
-                                        value="{{ old('penanggung_jawab') }}" placeholder="Nama penanggung jawab dokumen">
-                                </div>
-                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Penanggung Jawab</label>
+                            <input type="text" name="penanggung_jawab" class="form-control"
+                                value="{{ old('penanggung_jawab') }}" placeholder="Nama penanggung jawab dokumen">
                         </div>
 
                         {{-- Upload File --}}
@@ -77,10 +95,10 @@
                                 <span class="text-danger">*</span>
                             </label>
                             <div id="fileDropZone"
-                                style="border:2px dashed #c6f6d5;
-                                        border-radius:12px; padding:36px 20px;
-                                        text-align:center; cursor:pointer;
-                                        transition:all 0.2s; background:#f0faf4;"
+                                style="border:2px dashed #c6f6d5; border-radius:12px;
+                                        padding:36px 20px; text-align:center;
+                                        cursor:pointer; transition:all 0.2s;
+                                        background:#f0faf4;"
                                 onclick="document.getElementById('fileHiradc').click()" ondragover="handleFileDrag(event)"
                                 ondrop="handleFileDrop(event)">
                                 <i class="fas fa-file-alt"
@@ -108,21 +126,31 @@
                             <input type="file" name="file" id="fileHiradc" style="display:none;"
                                 accept=".pdf,.xlsx,.xls" onchange="showFileInfo(this)">
                             @error('file')
-                                <div
-                                    style="color:#dc3545; font-size:12px;
-                                            margin-top:6px;">
+                                <div style="color:#dc3545; font-size:12px; margin-top:6px;">
                                     {{ $message }}
                                 </div>
                             @enderror
                         </div>
 
-                        <div class="d-flex justify-content-between mt-4">
+                        <div class="alert-custom"
+                            style="background:#e8f5ee; border-left:4px solid #006b3f;
+                                    border-radius:8px; padding:12px 16px; margin-bottom:16px;">
+                            <i class="fas fa-info-circle mr-2" style="color:#006b3f;"></i>
+                            <span style="font-size:13px; color:#004d2e;">
+                                Setelah upload, kamu dapat menambahkan
+                                <strong>aktivitas</strong> dan
+                                <strong>aspek bahaya</strong>
+                                langsung di halaman detail dokumen.
+                            </span>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
                             <a href="{{ route('hiradc.index') }}" class="btn btn-secondary">
                                 <i class="fas fa-times mr-1"></i> Batal
                             </a>
                             <button type="submit" class="btn btn-primary" style="padding:10px 28px;">
                                 <i class="fas fa-upload mr-1"></i>
-                                Upload & Kirim untuk Validasi
+                                Upload Dokumen
                             </button>
                         </div>
                     </form>
@@ -138,7 +166,7 @@
                             border-bottom:2px solid #c6f6d5 !important;">
                     <h3 class="card-title" style="color:#006b3f !important;">
                         <i class="fas fa-info-circle mr-2"></i>
-                        Alur Persetujuan
+                        Alur Input HIRADC
                     </h3>
                 </div>
                 <div class="card-body" style="padding:16px;">
@@ -147,37 +175,38 @@
                             [
                                 'icon' => 'fas fa-upload',
                                 'color' => '#17a2b8',
-                                'label' => 'Admin Upload',
-                                'sub' => 'Officer HSSE mengupload dokumen',
+                                'label' => 'Upload Dokumen',
+                                'sub' => 'Upload file Excel/PDF + isi info area',
                             ],
                             [
-                                'icon' => 'fas fa-check',
+                                'icon' => 'fas fa-running',
                                 'color' => '#f0a500',
-                                'label' => 'Validator 1',
-                                'sub' => 'Asisten Manajer K3 mereview',
+                                'label' => 'Tambah Aktivitas',
+                                'sub' => 'Input setiap aktivitas kerja di area tersebut',
                             ],
                             [
-                                'icon' => 'fas fa-check-double',
-                                'color' => '#006b3f',
-                                'label' => 'Validator 2',
-                                'sub' => 'Senior Manager menyetujui',
+                                'icon' => 'fas fa-biohazard',
+                                'color' => '#dc3545',
+                                'label' => 'Tambah Aspek Bahaya',
+                                'sub' => 'Input potensi bahaya dan level risiko per aktivitas',
                             ],
                             [
-                                'icon' => 'fas fa-flag',
+                                'icon' => 'fas fa-tasks',
+                                'color' => '#6f42c1',
+                                'label' => 'Program Kerja',
+                                'sub' => 'Tambah program kerja untuk pengendalian risiko',
+                            ],
+                            [
+                                'icon' => 'fas fa-chart-line',
                                 'color' => '#00a65a',
-                                'label' => 'Dokumen Approved',
-                                'sub' => 'Siap digunakan sebagai acuan',
+                                'label' => 'Evaluasi Risiko',
+                                'sub' => 'Update level risiko akhir setelah pengendalian',
                             ],
                         ];
                     @endphp
-
                     @foreach ($flowSteps as $i => $step)
-                        <div
-                            style="display:flex; gap:12px;
-                                    align-items:flex-start; margin-bottom:{{ $i < 3 ? '0' : '0' }};">
-                            <div
-                                style="display:flex; flex-direction:column;
-                                        align-items:center;">
+                        <div style="display:flex; gap:12px; align-items:flex-start;">
+                            <div style="display:flex; flex-direction:column; align-items:center;">
                                 <div
                                     style="width:32px; height:32px; border-radius:50%;
                                             background:{{ $step['color'] }};
@@ -185,60 +214,27 @@
                                             justify-content:center; flex-shrink:0;">
                                     <i class="{{ $step['icon'] }}" style="color:#fff; font-size:12px;"></i>
                                 </div>
-                                @if ($i < 3)
+                                @if ($i < 4)
                                     <div
-                                        style="width:2px; height:28px;
+                                        style="width:2px; height:24px;
                                                 background:{{ $step['color'] }}40;
                                                 margin:3px 0;">
                                     </div>
                                 @endif
                             </div>
                             <div style="padding-top:5px; flex:1;">
-                                <div
-                                    style="font-size:13px; font-weight:600;
-                                            color:#2d3748;">
+                                <div style="font-size:13px; font-weight:600; color:#2d3748;">
                                     {{ $step['label'] }}
                                 </div>
-                                <div
-                                    style="font-size:11px; color:#a0aec0;
-                                            margin-bottom:{{ $i < 3 ? '0' : '0' }};">
+                                <div style="font-size:11px; color:#a0aec0;">
                                     {{ $step['sub'] }}
                                 </div>
                             </div>
                         </div>
-                        @if ($i < 3)
+                        @if ($i < 4)
                             <div style="height:2px;"></div>
                         @endif
                     @endforeach
-                </div>
-            </div>
-
-            {{-- Info Format --}}
-            <div class="card" style="background:#fffbf0;
-                        border:1px solid #fde68a !important;">
-                <div class="card-body" style="padding:16px;">
-                    <div
-                        style="font-size:12px; font-weight:700;
-                                color:#856404; margin-bottom:10px;">
-                        <i class="fas fa-paperclip mr-1"></i>
-                        Format File yang Didukung
-                    </div>
-                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                        @foreach ([['icon' => 'fas fa-file-pdf', 'color' => '#dc3545', 'label' => 'PDF'], ['icon' => 'fas fa-file-excel', 'color' => '#006b3f', 'label' => 'Excel (.xlsx)'], ['icon' => 'fas fa-file-excel', 'color' => '#006b3f', 'label' => 'Excel (.xls)']] as $fmt)
-                            <span
-                                style="background:#fff; border:1px solid #fde68a;
-                                         border-radius:6px; padding:5px 10px;
-                                         font-size:11px; font-weight:600;
-                                         color:#856404; display:flex;
-                                         align-items:center; gap:5px;">
-                                <i class="{{ $fmt['icon'] }}" style="color:{{ $fmt['color'] }};"></i>
-                                {{ $fmt['label'] }}
-                            </span>
-                        @endforeach
-                    </div>
-                    <div style="font-size:11px; color:#a0aec0; margin-top:10px;">
-                        Ukuran maksimal: <strong>10MB</strong> per file
-                    </div>
                 </div>
             </div>
         </div>
@@ -249,15 +245,10 @@
     <script>
         function showFileInfo(input) {
             if (input.files.length > 0) {
-                const file = input.files[0];
-                const dropZone = document.getElementById('fileDropZone');
-                const fileInfo = document.getElementById('fileInfo');
-                const fileName = document.getElementById('fileName');
-
-                fileName.textContent = file.name;
-                fileInfo.style.display = 'block';
-                dropZone.style.borderColor = '#006b3f';
-                dropZone.style.background = '#e8f5ee';
+                document.getElementById('fileName').textContent = input.files[0].name;
+                document.getElementById('fileInfo').style.display = 'block';
+                document.getElementById('fileDropZone').style.borderColor = '#006b3f';
+                document.getElementById('fileDropZone').style.background = '#e8f5ee';
             }
         }
 
@@ -268,14 +259,11 @@
 
         function handleFileDrop(e) {
             e.preventDefault();
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                const input = document.getElementById('fileHiradc');
-                const dt = new DataTransfer();
-                dt.items.add(files[0]);
-                input.files = dt.files;
-                showFileInfo(input);
-            }
+            const input = document.getElementById('fileHiradc');
+            const dt = new DataTransfer();
+            dt.items.add(e.dataTransfer.files[0]);
+            input.files = dt.files;
+            showFileInfo(input);
         }
     </script>
 @endsection

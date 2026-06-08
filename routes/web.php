@@ -50,6 +50,35 @@ Route::middleware(['auth'])->group(function () {
     // HIRADC
     Route::resource('hiradc', HiradcController::class)
         ->except(['edit', 'update']);
+
+    // Aktivitas
+    Route::post(
+        'hiradc/{hiradc}/aktivitas',
+        [HiradcController::class, 'storeAktivitas']
+    )
+        ->name('hiradc.aktivitas.store');
+    Route::delete(
+        'hiradc/{hiradc}/aktivitas/{aktivitas}',
+        [HiradcController::class, 'destroyAktivitas']
+    )
+        ->name('hiradc.aktivitas.destroy');
+
+    // Aspek Bahaya
+    Route::post(
+        'hiradc/aktivitas/{aktivitas}/aspek-bahaya',
+        [HiradcController::class, 'storeAspekBahaya']
+    )
+        ->name('hiradc.aspek-bahaya.store');
+    Route::delete(
+        'hiradc/aspek-bahaya/{aspek}',
+        [HiradcController::class, 'destroyAspekBahaya']
+    )
+        ->name('hiradc.aspek-bahaya.destroy');
+    Route::post(
+        'hiradc/aspek-bahaya/{aspek}/update-risiko-akhir',
+        [HiradcController::class, 'updateLevelRisikoAkhir']
+    )
+        ->name('hiradc.aspek-bahaya.update-risiko-akhir');
     Route::post(
         'hiradc/{hiradc}/validate-v1',
         [HiradcController::class, 'validateV1']
