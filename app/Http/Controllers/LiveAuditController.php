@@ -14,13 +14,26 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class LiveAuditController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         abort_if(Gate::denies('live_audit.view'), 403);
 
-        $liveAudits = LiveAudit::with('creator')
-            ->latest()
-            ->paginate(10);
+        $query = LiveAudit::with('creator');
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('nama_pekerjaan', 'like', "%{$search}%")
+                  ->orWhere('lokasi', 'like', "%{$search}%")
+                  ->orWhere('perusahaan', 'like', "%{$search}%")
+                  ->orWhere('no_work_order', 'like', "%{$search}%")
+                  ->orWhere('diminta_oleh', 'like', "%{$search}%");
+            });
+        }
+
+        $liveAudits = $query->latest()
+            ->paginate(10)
+            ->withQueryString();
 
         return view('live-audit.index', compact('liveAudits'));
     }
@@ -69,6 +82,8 @@ class LiveAuditController extends Controller
             'checklists.*'          => 'in:tidak,ya,na',
             'is_stopped'            => 'nullable|boolean',
             'stop_alasan'           => 'nullable|string',
+            'fotos'                 => 'nullable|array',
+            'fotos.*'               => 'image|mimes:jpg,jpeg,png|max:5120',
         ]);
 
         $liveAudit = LiveAudit::create([
@@ -88,6 +103,17 @@ class LiveAuditController extends Controller
             'stopped_at'            => $request->boolean('is_stopped') ? now() : null,
             'status'                => 'pending_v1',
         ]);
+
+        // Simpan foto dokumentasi kerja
+        if ($request->hasFile('fotos')) {
+            foreach ($request->file('fotos') as $foto) {
+                $fotoPath = $foto->store('live-audit-fotos', 'public');
+                \App\Models\LiveAuditFoto::create([
+                    'live_audit_id' => $liveAudit->id,
+                    'foto_path'     => $fotoPath,
+                ]);
+            }
+        }
 
         // Simpan jawaban checklist
         foreach ($validated['checklists'] as $itemId => $jawaban) {
@@ -131,7 +157,7 @@ class LiveAuditController extends Controller
         }
 
         return redirect()->route('live-audit.show', $liveAudit)
-            ->with('success', 'Live Audit berhasil disimpan. Draft temuan UA/UC otomatis dibuat.');
+            ->with('success', 'Live Audit berhasil disimpan. Draft temuan otomatis dibuat.');
     }
 
     public function show(LiveAudit $liveAudit)
@@ -231,6 +257,20 @@ class LiveAuditController extends Controller
             ->setPaper('a4', 'portrait');
 
         return $pdf->download('live-audit-' . $liveAudit->id . '.pdf');
+    }
+
+    public function resume(LiveAudit $liveAudit)
+    {
+        abort_if(Gate::denies('live_audit.create'), 403);
+
+        $liveAudit->update([
+            'is_stopped'  => false,
+            'stop_alasan' => null,
+            'stopped_at'  => null,
+        ]);
+
+        return redirect()->route('live-audit.show', $liveAudit)
+            ->with('success', 'Pekerjaan berhasil dilanjutkan kembali.');
     }
 
     public function destroy(LiveAudit $liveAudit)

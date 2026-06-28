@@ -121,6 +121,10 @@ Route::middleware(['auth'])->group(function () {
         [LiveAuditController::class, 'exportPdf']
     )
         ->name('live-audit.export-pdf');
+    Route::post(
+        'live-audit/{liveAudit}/resume',
+        [LiveAuditController::class, 'resume']
+    )->name('live-audit.resume');
 
     // Temuan UA/UC
     Route::post('temuan/classify-ai', function (\Illuminate\Http\Request $request) {
@@ -157,6 +161,11 @@ Route::middleware(['auth'])->group(function () {
             return response()->json(['error' => 'AI tidak tersedia'], 500);
         }
     })->name('temuan.classify-ai');
+
+    Route::get(
+        'temuan/export-kolektif',
+        [TemuanController::class, 'exportKolektif']
+    )->name('temuan.export-kolektif');
 
     Route::resource('temuan', TemuanController::class)
         ->except(['edit', 'update']);

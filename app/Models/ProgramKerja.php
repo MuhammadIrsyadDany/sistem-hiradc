@@ -14,6 +14,7 @@ class ProgramKerja extends Model
 
     protected $fillable = [
         'hiradc_id',
+        'aspek_bahaya_id',
         'created_by',
         'nama_program',
         'pengendalian_risiko',

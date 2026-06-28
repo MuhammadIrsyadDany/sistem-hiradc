@@ -20,7 +20,8 @@ class DashboardController extends Controller
         // ===============================================================
         $stats = [
             'hiradc_total'    => HiradcDocument::count(),
-            'hiradc_approved' => HiradcDocument::where('status', 'approved')->count(),
+            'hiradc_total'    => HiradcDocument::count(),
+            'hiradc_approved' => HiradcDocument::count(), // semua langsung approved
             'live_audit_total' => LiveAudit::count(),
             'temuan_open'     => Temuan::whereIn('status', ['open', 'validated_v1', 'validated_v2'])->count(),
             'temuan_closed'   => Temuan::where('status', 'closed')->count(),
@@ -126,6 +127,54 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // ===============================================================
+        // MONITORING PERUBAHAN TINGKAT RISIKO (Awal vs Akhir)
+        // ===============================================================
+        $aspeks = \App\Models\HiradcAspekBahaya::all();
+        $riskStats = [
+            'total' => $aspeks->count(),
+            'turun' => 0,
+            'tetap' => 0,
+            'naik' => 0,
+            'belum_evaluasi' => 0,
+            'awal' => [
+                'rendah' => 0,
+                'moderat' => 0,
+                'tinggi' => 0,
+                'sangat_tinggi' => 0,
+                'ekstrim' => 0,
+            ],
+            'akhir' => [
+                'rendah' => 0,
+                'moderat' => 0,
+                'tinggi' => 0,
+                'sangat_tinggi' => 0,
+                'ekstrim' => 0,
+            ],
+        ];
+
+        foreach ($aspeks as $aspek) {
+            $status = $aspek->status_penurunan;
+            if (!$aspek->level_risiko_akhir) {
+                $riskStats['belum_evaluasi']++;
+            } else {
+                if ($status === 'turun') {
+                    $riskStats['turun']++;
+                } elseif ($status === 'naik') {
+                    $riskStats['naik']++;
+                } else {
+                    $riskStats['tetap']++;
+                }
+            }
+
+            if (isset($riskStats['awal'][$aspek->level_risiko])) {
+                $riskStats['awal'][$aspek->level_risiko]++;
+            }
+            if ($aspek->level_risiko_akhir && isset($riskStats['akhir'][$aspek->level_risiko_akhir])) {
+                $riskStats['akhir'][$aspek->level_risiko_akhir]++;
+            }
+        }
+
         return view('dashboard', compact(
             'user',
             'stats',
@@ -136,6 +185,7 @@ class DashboardController extends Controller
             'temuanTerbaru',
             'liveAuditTerbaru',
             'programOverdue',
+            'riskStats',
         ));
     }
 }

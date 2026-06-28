@@ -59,8 +59,10 @@
                                 </div>
                             </td>
                             <td>
-                                <div style="font-size:12px; color:#718096;">
-                                    {{ Str::limit($program->hiradc->judul, 35) }}
+                                <div style="font-size:12px;">
+                                    <a href="{{ route('hiradc.show', $program->hiradc_id) }}" style="color:#006b3f; font-weight:600;">
+                                        {{ Str::limit($program->hiradc->judul, 35) }}
+                                    </a>
                                 </div>
                             </td>
                             <td style="font-size:13px;">{{ $program->pic }}</td>

@@ -1,0 +1,91 @@
+/* ================================================================
+   SIDEBAR — FORCE OVERRIDE (Corporate Green PLN)
+   ================================================================ */
+
+/* Sidebar Container Background */
+aside.main-sidebar,
+.main-sidebar,
+.main-sidebar.sidebar-dark-primary,
+.main-sidebar.elevation-4 {
+    background-color: #004d2e !important;
+    background-image: linear-gradient(180deg, #004d2e 0%, #005a36 60%, #006b3f 100%) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+    border-right: none !important;
+}
+
+/* Clear sub-container background */
+.main-sidebar .sidebar,
+.main-sidebar .os-padding,
+.main-sidebar .sidebar-wrapper,
+.main-sidebar .os-viewport,
+.main-sidebar .os-content {
+    background: transparent !important;
+}
+
+/* Brand Logo Area */
+.brand-link,
+.main-sidebar .brand-link {
+    background-color: #004d2e !important;
+    background-image: linear-gradient(90deg, #003620 0%, #004d2e 100%) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+/* Sidebar Menu Text & Icons Colors */
+.sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+    transition: all 0.25s ease;
+    border-radius: 8px;
+    margin: 2px 8px;
+}
+
+.sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link i {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Sidebar Hover State */
+.sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link:hover,
+.sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link:focus {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    color: #ffffff !important;
+}
+
+.sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link:hover i {
+    color: #ffffff !important;
+}
+
+/* Sidebar Active State */
+.sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link.active {
+    background-color: #ffffff !important;
+    color: #004d2e !important;
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+.sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link.active i {
+    color: #004d2e !important;
+}
+
+/* Menu Header Text (eg: HIRADC, PELAPORAN, MASTER DATA) */
+.sidebar-dark-primary .nav-sidebar .nav-header {
+    color: rgba(255, 255, 255, 0.5) !important;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 12px 16px 4px 20px;
+}
+
+/* User Profile Section in Sidebar (if active) */
+.user-panel {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.user-panel .info a {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 600;
+}
+
+.user-panel .info a:hover {
+    color: #ffffff !important;
+}

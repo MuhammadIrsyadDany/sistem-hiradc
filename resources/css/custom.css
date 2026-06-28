@@ -116,7 +116,7 @@
 .main-header.navbar {
     background: var(--pltu-white) !important;
     border-bottom: 2px solid var(--pltu-green-pale) !important;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.06) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06) !important;
 }
 
 .main-header .navbar-nav .nav-link {

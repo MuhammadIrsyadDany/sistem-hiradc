@@ -16,7 +16,7 @@
         <div class="d-flex align-items-center gap-2">
             <span class="badge"
                 style="background:#e8f5ee; color:#006b3f; font-size:12px;
-                         padding:7px 14px; border-radius:20px; font-weight:600;">
+                        padding:7px 14px; border-radius:20px; font-weight:600;">
                 <i class="fas fa-circle mr-1" style="font-size:8px;"></i>
                 Sistem Online
             </span>
@@ -358,6 +358,95 @@
 
                     <div style="text-align:right; font-size:12px; color:#a0aec0;">
                         Total: {{ $totalProgram }} program kerja
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Monitoring Perubahan Risiko (Awal vs Akhir) --}}
+    <div class="row">
+        {{-- Chart Perbandingan Risiko --}}
+        <div class="col-md-8 mb-3">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="card-title">
+                        <i class="fas fa-shield-alt mr-2" style="color:#006b3f;"></i>
+                        Perbandingan Tingkat Risiko (Awal vs Akhir)
+                    </h3>
+                    <span style="font-size:11px; color:#a0aec0;">Berdasarkan evaluasi program kerja</span>
+                </div>
+                <div class="card-body">
+                    <canvas id="chartPerbandinganRisiko" height="110"></canvas>
+                </div>
+            </div>
+        </div>
+
+        {{-- Ringkasan Penurunan Risiko --}}
+        <div class="col-md-4 mb-3">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-line mr-2" style="color:#006b3f;"></i>
+                        Efektivitas Program Kerja (K3)
+                    </h3>
+                </div>
+                <div class="card-body d-flex flex-column justify-content-center">
+                    @php
+                        $evaluasiTotal = $riskStats['turun'] + $riskStats['tetap'] + $riskStats['naik'];
+                        $pctTurun = $evaluasiTotal > 0 ? round(($riskStats['turun'] / $evaluasiTotal) * 100) : 0;
+                        $pctTetap = $evaluasiTotal > 0 ? round(($riskStats['tetap'] / $evaluasiTotal) * 100) : 0;
+                        $pctNaik = $evaluasiTotal > 0 ? round(($riskStats['naik'] / $evaluasiTotal) * 100) : 0;
+                    @endphp
+
+                    <div style="text-align:center; margin-bottom:15px;">
+                        <div style="font-size:36px; font-weight:800; color:#006b3f; line-height:1;">
+                            {{ $pctTurun }}%
+                        </div>
+                        <div style="font-size:12px; color:#718096; font-weight:600; margin-top:4px;">
+                            Risiko Berhasil Diturunkan
+                        </div>
+                    </div>
+
+                    <hr style="margin:10px 0;">
+
+                    <div class="mt-2">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span style="font-size:12px; color:#4a5568;">
+                                <i class="fas fa-arrow-down mr-2" style="color:#00a65a;"></i>
+                                Risiko Menurun
+                            </span>
+                            <span style="font-size:12px; font-weight:700; color:#2d3748;">
+                                {{ $riskStats['turun'] }} aspek ({{ $pctTurun }}%)
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span style="font-size:12px; color:#4a5568;">
+                                <i class="fas fa-arrows-alt-h mr-2" style="color:#ffc107;"></i>
+                                Risiko Tetap
+                            </span>
+                            <span style="font-size:12px; font-weight:700; color:#2d3748;">
+                                {{ $riskStats['tetap'] }} aspek ({{ $pctTetap }}%)
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span style="font-size:12px; color:#4a5568;">
+                                <i class="fas fa-arrow-up mr-2" style="color:#dc3545;"></i>
+                                Risiko Meningkat
+                            </span>
+                            <span style="font-size:12px; font-weight:700; color:#2d3748;">
+                                {{ $riskStats['naik'] }} aspek ({{ $pctNaik }}%)
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2" style="opacity:0.6;">
+                            <span style="font-size:12px; color:#4a5568;">
+                                <i class="fas fa-question-circle mr-2" style="color:#718096;"></i>
+                                Belum Dievaluasi
+                            </span>
+                            <span style="font-size:12px; font-weight:700; color:#2d3748;">
+                                {{ $riskStats['belum_evaluasi'] }} aspek
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -712,6 +801,75 @@
                         },
                     },
                     y: {
+                        grid: {
+                            display: false
+                        },
+                    },
+                },
+            },
+        });
+
+        // ============================================================
+        // Chart 4: Perbandingan Risiko Awal vs Akhir
+        // ============================================================
+        new Chart(document.getElementById('chartPerbandinganRisiko'), {
+            type: 'bar',
+            data: {
+                labels: ['Rendah', 'Moderat', 'Tinggi', 'Sangat Tinggi', 'Ekstrim'],
+                datasets: [
+                    {
+                        label: 'Risiko Awal',
+                        data: [
+                            {{ $riskStats['awal']['rendah'] }},
+                            {{ $riskStats['awal']['moderat'] }},
+                            {{ $riskStats['awal']['tinggi'] }},
+                            {{ $riskStats['awal']['sangat_tinggi'] }},
+                            {{ $riskStats['awal']['ekstrim'] }}
+                        ],
+                        backgroundColor: 'rgba(240,165,0,0.5)',
+                        borderColor: '#f0a500',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                    },
+                    {
+                        label: 'Risiko Akhir',
+                        data: [
+                            {{ $riskStats['akhir']['rendah'] }},
+                            {{ $riskStats['akhir']['moderat'] }},
+                            {{ $riskStats['akhir']['tinggi'] }},
+                            {{ $riskStats['akhir']['sangat_tinggi'] }},
+                            {{ $riskStats['akhir']['ekstrim'] }}
+                        ],
+                        backgroundColor: 'rgba(0,107,63,0.8)',
+                        borderColor: '#006b3f',
+                        borderWidth: 0,
+                        borderRadius: 4,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            padding: 20,
+                        },
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        },
+                        grid: {
+                            color: 'rgba(0,0,0,0.05)'
+                        },
+                    },
+                    x: {
                         grid: {
                             display: false
                         },

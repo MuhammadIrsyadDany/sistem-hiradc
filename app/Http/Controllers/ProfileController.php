@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -19,14 +20,28 @@ class ProfileController extends Controller
         $user = Auth::user();
 
         $validated = $request->validate([
-            'name'    => 'required|string|max:255',
-            'email'   => 'required|email|unique:users,email,' . $user->id,
-            'nip'     => 'nullable|string|max:50',
-            'jabatan' => 'nullable|string|max:100',
-            'no_hp'   => 'nullable|string|max:20',
+            'name'      => 'required|string|max:255',
+            'email'     => 'required|email|unique:users,email,' . $user->id,
+            'nip'       => 'nullable|string|max:50',
+            'jabatan'   => 'nullable|string|max:100',
+            'no_hp'     => 'nullable|string|max:20',
+            'signature' => 'nullable|image|mimes:png,jpg,jpeg|max:2048',
         ]);
 
-        $user->update($validated);
+        if ($request->hasFile('signature')) {
+            if ($user->signature_path) {
+                Storage::disk('public')->delete($user->signature_path);
+            }
+            $path = $request->file('signature')->store('signatures', 'public');
+            $user->signature_path = $path;
+        }
+
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->nip = $validated['nip'];
+        $user->jabatan = $validated['jabatan'];
+        $user->no_hp = $validated['no_hp'];
+        $user->save();
 
         return redirect()->route('profile.index')
             ->with('success', 'Profil berhasil diupdate.');

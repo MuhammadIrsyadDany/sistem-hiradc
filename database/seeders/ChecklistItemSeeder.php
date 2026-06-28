@@ -20,7 +20,7 @@ class ChecklistItemSeeder extends Seeder
             [7,  'Umum', 'Terdapat permit sesuai jenis pekerjaan yang dilakukan dan masih berlaku termasuk permit khusus', true],
             [8,  'Umum', 'Terdapat izin kerja overtime', true],
             [9,  'Umum', 'Safety sign terpasang sesuai dan dalam keadaan baik', false],
-            [10, 'Umum', 'Pihak ketiga menyediakan penerangan di lokasi kerja yang memadai', false],
+            [10, 'Umum', 'Menyediakan penerangan di lokasi kerja yang memadai', false],
             [11, 'Umum', 'Emergency tools tersedia dan dalam keadaan baik (seperti APAR, fire blanket dan peralatan P3K)', false],
             [12, 'Umum', 'Telah dilakukan sosialisasi prosedur keadaan darurat', false],
             [13, 'Umum', 'Kebersihan dan kerapian area kerja termasuk kerapian dan keamanan kabel listrik', false],
@@ -43,7 +43,7 @@ class ChecklistItemSeeder extends Seeder
             [28, 'Confined Space', 'Terdapat standby person pada akses confined space dan melakukan pengawasan', true],
             [29, 'Confined Space', 'Terdapat catatan keluar masuk karyawan kedalam confined space', true],
             [30, 'Confined Space', 'Tersedia peralatan untuk sirkulasi udara yang sedang beroperasi (blower/exhaust fan)', false],
-            [31, 'Confined Space', 'Pihak ketiga menyediakan penerangan yang cukup', false],
+            [31, 'Confined Space', 'Menyediakan penerangan yang cukup', false],
             // Section: Ketinggian
             [32, 'Ketinggian', 'Sudah dilakukan pengecekan perancah, scaffolding atau tangga telah diperiksa dan terdapat tagging', false],
             // Section: Penggalian

@@ -23,23 +23,33 @@
             style="background:linear-gradient(135deg,#f8d7da,#f5c6cb);
                     border:2px solid #dc3545; border-radius:12px;
                     padding:16px 20px; margin-bottom:20px;
-                    display:flex; align-items:center; gap:14px;">
-            <div
-                style="width:48px; height:48px; border-radius:12px;
-                        background:#dc3545; display:flex; align-items:center;
-                        justify-content:center; flex-shrink:0;">
-                <i class="fas fa-stop-circle" style="color:#fff; font-size:22px;"></i>
-            </div>
-            <div>
+                    display:flex; justify-content:space-between; align-items:center; gap:14px;">
+            <div style="display:flex; align-items:center; gap:14px;">
                 <div
-                    style="font-weight:800; color:#721c24; font-size:16px;
-                             text-transform:uppercase; letter-spacing:0.5px;">
-                    ⚠ Pekerjaan Di-STOP
+                    style="width:48px; height:48px; border-radius:12px;
+                            background:#dc3545; display:flex; align-items:center;
+                            justify-content:center; flex-shrink:0;">
+                    <i class="fas fa-stop-circle" style="color:#fff; font-size:22px;"></i>
                 </div>
-                <div style="font-size:13px; color:#721c24; margin-top:2px;">
-                    {{ $liveAudit->stop_alasan }}
+                <div>
+                    <div
+                        style="font-weight:800; color:#721c24; font-size:16px;
+                                 text-transform:uppercase; letter-spacing:0.5px;">
+                        ⚠ Pekerjaan Di-STOP
+                    </div>
+                    <div style="font-size:13px; color:#721c24; margin-top:2px;">
+                        {{ $liveAudit->stop_alasan }}
+                    </div>
                 </div>
             </div>
+            @can('live_audit.create')
+                <form action="{{ route('live-audit.resume', $liveAudit) }}" method="POST" class="m-0">
+                    @csrf
+                    <button type="submit" class="btn btn-success btn-sm font-weight-bold">
+                        <i class="fas fa-play mr-1"></i> Lanjutkan Pekerjaan
+                    </button>
+                </form>
+            @endcan
         </div>
     @endif
 
@@ -382,6 +392,31 @@
                     @endif
                 </div>
             </div>
+            {{-- Foto Dokumentasi --}}
+            @if ($liveAudit->fotos->isNotEmpty())
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-camera mr-2" style="color:#006b3f;"></i>
+                            Foto Dokumentasi Kerja
+                            <span style="font-size:12px; color:#a0aec0; font-weight:400;">
+                                ({{ $liveAudit->fotos->count() }} foto)
+                            </span>
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:12px;">
+                            @foreach ($liveAudit->fotos as $foto)
+                                <div style="position:relative; border-radius:10px; overflow:hidden; border:1px solid #e2e8f0; cursor:pointer;"
+                                     onclick="window.open('{{ Storage::url($foto->foto_path) }}', '_blank')">
+                                    <img src="{{ Storage::url($foto->foto_path) }}" alt="Foto Dokumentasi"
+                                         style="width:100%; height:90px; object-fit:cover;">
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            @endif
         </div>
 
         {{-- Kolom Kanan --}}
@@ -460,6 +495,16 @@
                                     <div style="font-size:10px; color:#a0aec0;">
                                         {{ $step['time'] }}
                                     </div>
+                                    {{-- Display Signature if exists --}}
+                                    @if ($i === 1 && $liveAudit->validatorV1 && $liveAudit->validatorV1->signature_path)
+                                        <div class="mt-1" style="background:#fff; border:1px dashed #e2e8f0; border-radius:4px; padding:4px; display:inline-block;">
+                                            <img src="{{ Storage::url($liveAudit->validatorV1->signature_path) }}" style="height:35px; max-width:110px; object-fit:contain;">
+                                        </div>
+                                    @elseif ($i === 2 && $liveAudit->validatorV2 && $liveAudit->validatorV2->signature_path)
+                                        <div class="mt-1" style="background:#fff; border:1px dashed #e2e8f0; border-radius:4px; padding:4px; display:inline-block;">
+                                            <img src="{{ Storage::url($liveAudit->validatorV2->signature_path) }}" style="height:35px; max-width:110px; object-fit:contain;">
+                                        </div>
+                                    @endif
                                 @else
                                     <div style="font-size:11px; color:#cbd5e0;">
                                         Menunggu...

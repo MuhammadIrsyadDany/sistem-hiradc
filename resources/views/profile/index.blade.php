@@ -191,7 +191,7 @@
                     </h3>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('profile.update') }}" method="POST">
+                    <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
                         @csrf @method('PUT')
 
                         <div class="row">
@@ -245,6 +245,34 @@
                                     <label>No HP</label>
                                     <input type="text" name="no_hp" class="form-control"
                                         value="{{ old('no_hp', $user->no_hp) }}" placeholder="08xxxxxxxxxx">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {{-- Upload Signature --}}
+                        <div class="form-group mt-3">
+                            <label>Tanda Tangan Scan (PNG/JPG)</label>
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="custom-file">
+                                        <input type="file" name="signature" class="custom-file-input" id="signatureFile" accept="image/*">
+                                        <label class="custom-file-label" for="signatureFile">Pilih file ttd scan...</label>
+                                    </div>
+                                    <small class="text-muted mt-1 d-block">
+                                        Upload file scan tanda tangan digital (format PNG transparan disarankan). Maksimal 2MB.
+                                    </small>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    @if ($user->signature_path)
+                                        <div class="mt-2" style="border: 1px dashed #cbd5e0; padding: 8px; border-radius: 8px; background: #fafafa;">
+                                            <img src="{{ Storage::url($user->signature_path) }}" alt="Tanda Tangan" style="max-height: 70px; max-width: 100%; object-fit: contain;">
+                                            <div style="font-size: 10px; color: #a0aec0; margin-top: 4px;">Tanda tangan aktif</div>
+                                        </div>
+                                    @else
+                                        <div class="mt-2 text-muted" style="font-size: 12px; border: 1px dashed #cbd5e0; padding: 15px; border-radius: 8px;">
+                                            Belum ada tanda tangan
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -443,6 +471,13 @@
                 label.style.color = levels[idx].color;
                 label.style.fontWeight = '600';
             }
+        });
+
+        // Signature file input dynamic label
+        document.getElementById('signatureFile')?.addEventListener('change', function(e) {
+            const fileName = this.files[0]?.name ?? 'Pilih file ttd scan...';
+            const label = this.nextElementSibling;
+            if (label) label.textContent = fileName;
         });
     </script>
 @endsection

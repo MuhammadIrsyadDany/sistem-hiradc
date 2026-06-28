@@ -16,6 +16,7 @@
         <div class="card-body">
             <form action="{{ route('program-kerja.store') }}" method="POST">
                 @csrf
+                <input type="hidden" name="hiradc_id" value="{{ $hiradc->id }}">
                 <input type="hidden" name="aspek_bahaya_id" value="{{ $aspek?->id }}">
 
                 @if ($aspek)

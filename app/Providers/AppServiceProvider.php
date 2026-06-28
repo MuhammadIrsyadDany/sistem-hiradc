@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
         | FORCE HTTPS UNTUK NGROK
         |--------------------------------------------------------------------------
         */
-        // URL::forceScheme('https');
+        URL::forceScheme('https');
 
         /*
         |--------------------------------------------------------------------------
@@ -50,18 +50,11 @@ class AppServiceProvider extends ServiceProvider
         | View Composer Global Data
         |--------------------------------------------------------------------------
         */
-        View::composer('*', function ($view) {
-
+        \Illuminate\Support\Facades\View::composer('*', function ($view) {
             if (auth()->check()) {
-
                 $view->with([
-
-                    'sidebarTemuanDraft' =>
-                    \App\Models\Temuan::where('status', 'draft')->count(),
-
-                    'sidebarProgramOverdue' =>
-                    \App\Models\ProgramKerja::where('status', 'overdue')->count(),
-
+                    'sidebarTemuanDraft'    => \App\Models\Temuan::where('status', 'draft')->count(),
+                    'sidebarProgramOverdue' => \App\Models\ProgramKerja::where('status', 'overdue')->count(),
                 ]);
             }
         });

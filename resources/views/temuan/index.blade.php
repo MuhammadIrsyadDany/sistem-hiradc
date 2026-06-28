@@ -1,9 +1,12 @@
 @extends('adminlte::page')
-@section('title', 'Pelaporan Temuan UA/UC')
+@section('title', 'Pelaporan Temuan')
 
 @section('content_header')
-    <x-page-header title="Pelaporan Temuan UA/UC" subtitle="Laporan unsafe action, unsafe condition, near miss & positive"
+    <x-page-header title="Pelaporan Temuan" subtitle="Laporan unsafe action, unsafe condition, near miss & positive"
         icon="fas fa-exclamation-triangle">
+        <button class="btn btn-outline-success mr-2" type="button" data-toggle="collapse" data-target="#exportKolektifPanel" aria-expanded="false" aria-controls="exportKolektifPanel">
+            <i class="fas fa-file-pdf mr-1"></i> Cetak Laporan Kolektif
+        </button>
         @can('temuan.create')
             <a href="{{ route('temuan.create') }}" class="btn btn-primary">
                 <i class="fas fa-plus mr-1"></i> Laporkan Temuan
@@ -13,6 +16,61 @@
 @endsection
 
 @section('content')
+    {{-- Panel Export Kolektif --}}
+    <div class="collapse mb-3" id="exportKolektifPanel">
+        <div class="card card-body bg-light border-success">
+            <h5 style="font-weight: 700; color: #006b3f; font-size: 14px; margin-bottom: 12px;">
+                <i class="fas fa-file-pdf mr-1"></i> Export Laporan Kolektif Bulanan Temuan
+            </h5>
+            <form action="{{ route('temuan.export-kolektif') }}" method="GET" target="_blank" class="form-inline d-flex flex-wrap" style="gap:12px;">
+                <div class="form-group mb-2">
+                    <label class="mr-2" style="font-size:12px;">Bulan:</label>
+                    <select name="bulan" class="form-control form-control-sm" required>
+                        @foreach ([
+                            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+                        ] as $num => $name)
+                            <option value="{{ $num }}" {{ date('n') == $num ? 'selected' : '' }}>{{ $name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group mb-2">
+                    <label class="mr-2" style="font-size:12px;">Tahun:</label>
+                    <select name="tahun" class="form-control form-control-sm" required>
+                        @for ($y = date('Y'); $y >= 2024; $y--)
+                            <option value="{{ $y }}">{{ $y }}</option>
+                        @endfor
+                    </select>
+                </div>
+                <div class="form-group mb-2">
+                    <label class="mr-2" style="font-size:12px;">Kategori:</label>
+                    <select name="kategori" class="form-control form-control-sm">
+                        <option value="all">Semua Kategori</option>
+                        <option value="unsafe_action">Unsafe Action</option>
+                        <option value="unsafe_condition">Unsafe Condition</option>
+                        <option value="near_miss">Near Miss</option>
+                        <option value="positive">Positive</option>
+                    </select>
+                </div>
+                <div class="form-group mb-2">
+                    <label class="mr-2" style="font-size:12px;">Status:</label>
+                    <select name="status" class="form-control form-control-sm">
+                        <option value="all">Semua Status</option>
+                        <option value="draft">Draft</option>
+                        <option value="open">Open</option>
+                        <option value="validated_v1">Validated V1</option>
+                        <option value="validated_v2">Validated V2</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-success btn-sm mb-2" style="padding: 5px 15px;">
+                    <i class="fas fa-download mr-1"></i> Download PDF
+                </button>
+            </form>
+        </div>
+    </div>
+
     @if (session('success'))
         <x-alert type="success">{{ session('success') }}</x-alert>
     @endif
@@ -52,7 +110,7 @@
             'validated_v2' => ['label' => 'Validated V2', 'color' => '#006b3f'],
             'closed' => ['label' => 'Closed', 'color' => '#00a65a'],
         ] as $key => $item)
-            <a href="{{ route('temuan.index', ['status' => $key]) }}"
+            <a href="{{ route('temuan.index', ['status' => $key, 'search' => request('search')]) }}"
                 style="padding:6px 16px; border-radius:20px; font-size:12px;
                       font-weight:600; text-decoration:none; transition:all 0.2s;
                       background:{{ $filterStatus === $key ? $item['color'] : '#f4f6f9' }};
@@ -64,6 +122,22 @@
     </div>
 
     <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="card-title">Daftar Temuan</h3>
+            <form action="" method="GET" class="form-inline ml-auto">
+                @if(request('status'))
+                    <input type="hidden" name="status" value="{{ request('status') }}">
+                @endif
+                <div class="input-group input-group-sm" style="width: 250px;">
+                    <input type="text" name="search" class="form-control" placeholder="Cari judul, lokasi, pic..." value="{{ request('search') }}">
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
         <div class="card-body p-0">
             <table class="table table-hover mb-0">
                 <thead>

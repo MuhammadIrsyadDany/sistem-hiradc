@@ -37,6 +37,11 @@ class HiradcDocument extends Model
         return $this->hasMany(ProgramKerja::class, 'hiradc_id');
     }
 
+    public function getJudulAttribute(): string
+    {
+        return $this->nama_area;
+    }
+
     public function getTotalAspekAttribute(): int
     {
         return $this->aktivitas->sum(fn($a) => $a->aspekBahaya->count());

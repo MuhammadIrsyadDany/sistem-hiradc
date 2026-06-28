@@ -17,6 +17,7 @@ class User extends Authenticatable
         'nip',
         'jabatan',
         'no_hp',
+        'signature_path',
     ];
 
     protected $hidden = [

@@ -73,7 +73,7 @@
             <td width="55%" style="text-align:center;">
                 <strong>PT. PLN NUSANTARA POWER</strong><br>
                 INTEGRATED MANAGEMENT SYSTEM<br>
-                <strong>FORMULIR LIVE AUDIT/WORK IN PRACTISE PIHAK KETIGA</strong>
+                <strong>FORMULIR LIVE AUDIT/WORK IN PRACTISE</strong>
             </td>
             <td width="30%">
                 No Dokumen: ___________<br>
@@ -202,14 +202,24 @@
     <table class="footer-table">
         <tr>
             <td width="50%" class="text-center">
-                1. Bidang K3<br><br><br><br>
+                1. Bidang K3<br>
+                @if ($liveAudit->validatorV1 && $liveAudit->validatorV1->signature_path)
+                    <img src="{{ public_path('storage/' . $liveAudit->validatorV1->signature_path) }}" style="height: 55px; max-width: 140px; object-fit: contain; margin: 5px 0;">
+                @else
+                    <br><br><br>
+                @endif
                 <div class="signature-box">
                     {{ $liveAudit->validatorV1?->name ?? '________________________' }}<br>
                     <small>Date/Name & Signature</small>
                 </div>
             </td>
             <td width="50%" class="text-center">
-                2. Pengawas K3 / Pengawas Pekerjaan<br><br><br><br>
+                2. Pengawas K3 / Pengawas Pekerjaan<br>
+                @if ($liveAudit->validatorV2 && $liveAudit->validatorV2->signature_path)
+                    <img src="{{ public_path('storage/' . $liveAudit->validatorV2->signature_path) }}" style="height: 55px; max-width: 140px; object-fit: contain; margin: 5px 0;">
+                @else
+                    <br><br><br>
+                @endif
                 <div class="signature-box">
                     {{ $liveAudit->validatorV2?->name ?? '________________________' }}<br>
                     <small>Date/Name & Signature</small>
@@ -229,6 +239,27 @@
                 <td>Alasan: {{ $liveAudit->stop_alasan }}</td>
             </tr>
         </table>
+    @endif
+
+    {{-- Lampiran Foto Dokumentasi Kerja --}}
+    @if ($liveAudit->fotos->isNotEmpty())
+        <div style="page-break-before: always; margin-top: 15px;">
+            <strong>FOTO DOKUMENTASI KERJA:</strong><br><br>
+            <table style="border: none; width: 100%;">
+                @foreach ($liveAudit->fotos->chunk(2) as $row)
+                    <tr>
+                        @foreach ($row as $foto)
+                            <td style="border: none; padding: 10px; text-align: center; width: 50%;">
+                                <img src="{{ public_path('storage/' . $foto->foto_path) }}" style="max-width: 100%; height: 180px; object-fit: cover; border: 1px solid #ccc; border-radius: 4px;">
+                            </td>
+                        @endforeach
+                        @if ($row->count() < 2)
+                            <td style="border: none; width: 50%;"></td>
+                        @endif
+                    </tr>
+                @endforeach
+            </table>
+        </div>
     @endif
 </body>
 

@@ -299,6 +299,7 @@ return [
 
     'head_tags' => [
         '<meta name="csrf-token" content="{{ csrf_token() }}">',
+        '<link rel="stylesheet" href="{{ asset(\'css/custom.css\') }}">',
     ],
 
     /*
@@ -342,7 +343,7 @@ return [
         ],
         ['header' => 'PELAPORAN'],
         [
-            'text' => 'Temuan UA/UC',
+            'text' => 'Temuan',
             'url'  => 'temuan',
             'icon' => 'fas fa-exclamation-triangle',
             'can'  => 'temuan.view',
@@ -421,26 +422,6 @@ return [
                     'asset' => false,
                     'location' => '//cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css',
                 ],
-                [
-                    'type' => 'js',
-                    'asset' => false,
-                    'location' => '//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js',
-                ],
-            ],
-
-            'custom_css' => [
-                [
-                    'type'     => 'css',
-                    'asset'    => true,
-                    'location' => 'css/custom.css',
-                ],
-            ],
-        ],
-
-        // Tambahan plugin Datatables
-        'Datatables' => [
-            'active' => false,
-            'files' => [
                 [
                     'type' => 'js',
                     'asset' => false,

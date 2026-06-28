@@ -16,16 +16,31 @@ class HiradcController extends Controller
     // HIRADC DOCUMENT
     // ================================================================
 
-    public function index()
+    public function index(Request $request)
     {
         abort_if(Gate::denies('hiradc.view'), 403);
 
-        $documents = HiradcDocument::with([
+        $query = HiradcDocument::with([
             'uploader',
             'aktivitas.aspekBahaya',
-        ])
-            ->latest()
-            ->paginate(10);
+        ]);
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('nama_area', 'like', "%{$search}%")
+                  ->orWhere('unit', 'like', "%{$search}%")
+                  ->orWhere('divisi', 'like', "%{$search}%")
+                  ->orWhere('area_lokasi', 'like', "%{$search}%")
+                  ->orWhere('penanggung_jawab', 'like', "%{$search}%")
+                  ->orWhere('no_dokumen', 'like', "%{$search}%")
+                  ->orWhere('tahun', 'like', "%{$search}%");
+            });
+        }
+
+        $documents = $query->latest()
+            ->paginate(10)
+            ->withQueryString();
 
         return view('hiradc.index', compact('documents'));
     }

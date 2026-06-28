@@ -2,7 +2,7 @@
 @section('title', 'Detail Temuan')
 
 @section('content_header')
-    <x-page-header title="Detail Temuan" subtitle="Informasi lengkap temuan UA/UC" icon="fas fa-exclamation-triangle"
+    <x-page-header title="Detail Temuan" subtitle="Informasi lengkap temuan" icon="fas fa-exclamation-triangle"
         backUrl="{{ route('temuan.index') }}">
     </x-page-header>
 @endsection
@@ -541,7 +541,7 @@
 
             {{-- Upload Bukti & Close --}}
             @if ($temuan->status === 'validated_v2')
-                @can('temuan.close')
+                @if (auth()->user()->can('temuan.close') || auth()->id() === $temuan->reported_by)
                     <div class="card mb-3">
                         <div class="card-header"
                             style="background:#e8f5ee !important;
@@ -588,7 +588,7 @@
                             @endif
                         </div>
                     </div>
-                @endcan
+                @endif
             @endif
 
         </div>

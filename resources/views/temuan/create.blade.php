@@ -2,7 +2,7 @@
 @section('title', 'Laporkan Temuan')
 
 @section('content_header')
-    <x-page-header title="Laporkan Temuan UA/UC"
+    <x-page-header title="Laporkan Temuan"
         subtitle="Dokumentasikan temuan unsafe action, unsafe condition, near miss, atau positive"
         icon="fas fa-exclamation-triangle" backUrl="{{ route('temuan.index') }}">
     </x-page-header>

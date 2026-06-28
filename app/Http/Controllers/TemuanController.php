@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 
 class TemuanController extends Controller
 {
@@ -37,20 +39,80 @@ class TemuanController extends Controller
     // CRUD UTAMA
     // ===================================================================
 
-    public function index()
+    public function index(Request $request)
     {
         abort_if(Gate::denies('temuan.view'), 403);
 
         $query = Temuan::with(['reporter', 'fotos'])->latest();
 
         // Filter by status
-        if (request('status') && request('status') !== 'all') {
-            $query->where('status', request('status'));
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('judul_temuan', 'like', "%{$search}%")
+                  ->orWhere('lokasi', 'like', "%{$search}%")
+                  ->orWhere('pic', 'like', "%{$search}%")
+                  ->orWhere('distrik', 'like', "%{$search}%")
+                  ->orWhere('kondisi', 'like', "%{$search}%");
+            });
         }
 
         $temuans = $query->paginate(10)->withQueryString();
 
         return view('temuan.index', compact('temuans'));
+    }
+
+    public function exportKolektif(Request $request)
+    {
+        abort_if(Gate::denies('temuan.view'), 403);
+
+        $request->validate([
+            'bulan'    => 'required|integer|between:1,12',
+            'tahun'    => 'required|integer|min:2020|max:' . (date('Y') + 5),
+            'kategori' => 'nullable|string',
+            'status'   => 'nullable|string',
+        ]);
+
+        $query = Temuan::with(['reporter', 'closedBy'])
+            ->whereYear('created_at', $request->tahun)
+            ->whereMonth('created_at', $request->bulan);
+
+        if ($request->kategori && $request->kategori !== 'all') {
+            $query->where('kategori', $request->kategori);
+        }
+
+        if ($request->status && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        $temuans = $query->latest()->get();
+
+        $bulanIndo = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+        $namaBulan = $bulanIndo[$request->bulan] ?? '';
+        $kategoriLabel = self::KATEGORI_LIST[$request->kategori] ?? 'Semua Kategori';
+        $statusLabel = ucfirst(str_replace('_', ' ', $request->status ?? 'semua'));
+
+        $pdf = Pdf::loadView('temuan.pdf-kolektif', [
+            'temuans'       => $temuans,
+            'bulan'         => $request->bulan,
+            'namaBulan'     => $namaBulan,
+            'tahun'         => $request->tahun,
+            'kategori'      => $request->kategori,
+            'kategoriLabel' => $kategoriLabel,
+            'status'        => $request->status,
+            'statusLabel'   => $statusLabel,
+        ])->setPaper('a4', 'landscape');
+
+        return $pdf->download("laporan-kolektif-temuan-{$namaBulan}-{$request->tahun}.pdf");
     }
 
     public function create()
@@ -205,7 +267,7 @@ class TemuanController extends Controller
 
     public function uploadBukti(Request $request, Temuan $temuan)
     {
-        abort_if(Gate::denies('temuan.close'), 403);
+        abort_if(Gate::denies('temuan.close') && Auth::id() !== $temuan->reported_by, 403);
 
         $request->validate([
             'foto'       => 'required|image|mimes:jpg,jpeg,png|max:5120',
@@ -227,7 +289,7 @@ class TemuanController extends Controller
 
     public function close(Request $request, Temuan $temuan)
     {
-        abort_if(Gate::denies('temuan.close'), 403);
+        abort_if(Gate::denies('temuan.close') && Auth::id() !== $temuan->reported_by, 403);
 
         if ($temuan->buktiPerbaikan->isEmpty()) {
             return redirect()->route('temuan.show', $temuan)

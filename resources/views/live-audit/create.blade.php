@@ -2,13 +2,13 @@
 @section('title', 'Buat Live Audit')
 
 @section('content_header')
-    <x-page-header title="Buat Live Audit / WIP" subtitle="Work In Practise — pemeriksaan keselamatan pekerjaan pihak ketiga"
+    <x-page-header title="Buat Live Audit / WIP" subtitle="Work In Practise — pemeriksaan keselamatan pekerjaan"
         icon="fas fa-clipboard-check" backUrl="{{ route('live-audit.index') }}">
     </x-page-header>
 @endsection
 
 @section('content')
-    <form action="{{ route('live-audit.store') }}" method="POST">
+    <form action="{{ route('live-audit.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
         {{-- Header Pekerjaan --}}
@@ -304,6 +304,55 @@
             </div>
         </div>
 
+        {{-- Foto Dokumentasi --}}
+        <div class="card mb-3" style="border:2px solid #006b3f !important;">
+            <div class="card-header"
+                style="background:#e8f5ee !important;
+                        border-bottom:2px solid #c6f6d5 !important;">
+                <h3 class="card-title" style="color:#006b3f !important;">
+                    <i class="fas fa-camera mr-2"></i>
+                    Foto Dokumentasi Kerja
+                </h3>
+            </div>
+            <div class="card-body">
+                <div id="dropZone"
+                    style="border:2px dashed #c6f6d5; border-radius:12px;
+                            padding:30px 20px; text-align:center;
+                            cursor:pointer; transition:all 0.2s;
+                            background:#f0faf4;"
+                    onclick="document.getElementById('fotoAudit').click()" ondragover="handleDragOver(event)"
+                    ondrop="handleDrop(event)">
+                    <i class="fas fa-cloud-upload-alt"
+                        style="font-size:36px; color:#c6f6d5;
+                              margin-bottom:10px; display:block;"></i>
+                    <div
+                        style="font-size:13px; font-weight:600;
+                                color:#006b3f; margin-bottom:4px;">
+                        Klik atau drag foto ke sini
+                    </div>
+                    <div style="font-size:11px; color:#a0aec0;">
+                        JPG, PNG · Maks 5MB per foto
+                    </div>
+                </div>
+
+                <input type="file" name="fotos[]" id="fotoAudit" accept="image/*" multiple
+                    style="display:none;" onchange="previewFotos(this)">
+
+                @error('fotos')
+                    <div style="color:#dc3545; font-size:12px; margin-top:6px;">
+                        {{ $message }}
+                    </div>
+                @enderror
+
+                {{-- Preview Grid --}}
+                <div id="fotoPreview"
+                    style="display:grid;
+                            grid-template-columns:repeat(auto-fill, minmax(100px, 1fr));
+                            gap:8px; margin-top:12px;">
+                </div>
+            </div>
+        </div>
+
         {{-- Submit --}}
         <div class="d-flex justify-content-between mb-4">
             <a href="{{ route('live-audit.index') }}" class="btn btn-secondary">
@@ -334,6 +383,61 @@
         function toggleStopAlasan(checked) {
             document.getElementById('stop_alasan_container')
                 .style.display = checked ? 'block' : 'none';
+        }
+
+        // Preview Foto
+        function previewFotos(input) {
+            renderPreviews(Array.from(input.files));
+        }
+
+        function renderPreviews(files) {
+            const preview = document.getElementById('fotoPreview');
+            preview.innerHTML = '';
+            const dropZone = document.getElementById('dropZone');
+
+            if (files.length > 0) {
+                dropZone.style.borderColor = '#006b3f';
+                dropZone.style.background = '#e8f5ee';
+            }
+
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const div = document.createElement('div');
+                    div.style.cssText =
+                        'position:relative; border-radius:8px; overflow:hidden;';
+                    div.innerHTML = `
+                <img src="${e.target.result}"
+                     style="width:100%; height:75px; object-fit:cover;
+                            border-radius:8px;">
+                <div style="position:absolute; bottom:0; left:0; right:0;
+                             background:rgba(0,0,0,0.4); padding:3px;
+                             text-align:center;">
+                    <span style="color:#fff; font-size:9px;">
+                        ${file.name.substring(0,12)}...
+                    </span>
+                </div>`;
+                    preview.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            document.getElementById('dropZone').style.borderColor = '#006b3f';
+            document.getElementById('dropZone').style.background = '#e8f5ee';
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const files = Array.from(e.dataTransfer.files)
+                .filter(f => f.type.startsWith('image/'));
+            const input = document.getElementById('fotoAudit');
+            const dt = new DataTransfer();
+            files.forEach(f => dt.items.add(f));
+            input.files = dt.files;
+            renderPreviews(files);
         }
     </script>
 @endsection

@@ -2,7 +2,7 @@
 @section('title', 'Live Audit')
 
 @section('content_header')
-    <x-page-header title="Live Audit / WIP" subtitle="Work In Practise — pemeriksaan keselamatan pekerjaan pihak ketiga"
+    <x-page-header title="Live Audit / WIP" subtitle="Work In Practise — pemeriksaan keselamatan pekerjaan"
         icon="fas fa-clipboard-check">
         @can('live_audit.create')
             <a href="{{ route('live-audit.create') }}" class="btn btn-primary">
@@ -40,6 +40,19 @@
     </div>
 
     <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="card-title">Daftar Live Audit / WIP</h3>
+            <form action="" method="GET" class="form-inline ml-auto">
+                <div class="input-group input-group-sm" style="width: 250px;">
+                    <input type="text" name="search" class="form-control" placeholder="Cari pekerjaan, perusahaan..." value="{{ request('search') }}">
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
         <div class="card-body p-0">
             <table class="table table-hover mb-0">
                 <thead>
