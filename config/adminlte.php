@@ -483,6 +483,17 @@ return [
                 ],
             ],
         ],
+
+        'CustomStyles' => [
+            'active' => true,
+            'files' => [
+                [
+                    'type' => 'css',
+                    'asset' => true,
+                    'location' => 'css/custom.css',
+                ],
+            ],
+        ],
     ],
 
     /*
